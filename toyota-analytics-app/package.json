@@ -2,6 +2,7 @@
   "name": "toyota-analytics-app",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -13,13 +14,18 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@cubejs-client/core": "^0.31.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.6.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "parcel src/index.html"
   },
   "eslintConfig": {
     "extends": [

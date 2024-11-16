@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 // Import other pages/components as you add them
 // import CarPage from './pages/CarPage';
-// import AnalyticsPage from './pages/AnalyticsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+
 
 const App = () => {
     return (
@@ -12,6 +13,9 @@ const App = () => {
             <Routes>
                 {/* Route for HomePage */}
                 <Route path="/" element={<HomePage />} />
+
+                {/* Route for AnalyticsPage */}
+                <Route path='/analytics' element={<AnalyticsPage />} />
                 
                 {/* Future Routes */}
                 {/* Example: */}

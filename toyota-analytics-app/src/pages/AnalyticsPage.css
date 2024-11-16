@@ -1,0 +1,52 @@
+.analysis-page {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .options-column {
+    flex: 1;
+    border-right: 1px solid #ddd;
+    padding-right: 20px;
+  }
+  
+  .options-list {
+    margin-top: 10px;
+  }
+  
+  .option-item {
+    margin-bottom: 10px;
+  }
+  
+  .submit-button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .results-section {
+    flex: 3;
+    padding-left: 20px;
+  }
+  
+  .car-columns-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .car-columns-table th,
+  .car-columns-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .car-columns-table th {
+    background-color: #f4f4f4;
+    text-align: left;
+  }
+  

@@ -24,16 +24,17 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 50px;
+    margin-bottom: 3rem;
 }
 
 .logo {
-    width: 600px;
-    margin-bottom: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 1.25rem;
 }
 
 h2 {
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #333;
     margin: 0;
 }
@@ -42,16 +43,17 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 20px;
+    margin: 1.25rem;
+    gap: 1.25rem;
 }
 
 .launch-button {
-    padding: 15px 30px;
-    font-size: 16px;
+    padding: 0.9375rem 1.875rem;
+    font-size: 1rem;
     color: white;
     background-color: #e31b23;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
     text-transform: uppercase;
 }
@@ -61,14 +63,16 @@ h2 {
 }
 
 .footer {
-    font-size: 12px;
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.8rem;
     color: #555;
 }
 
 .footer a {
     color: #e31b23;
     text-decoration: none;
-    margin: 0 10px;
+    margin: 0 0.625rem;
 }
 
 .footer a:hover {

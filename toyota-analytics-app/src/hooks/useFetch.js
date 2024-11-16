@@ -8,7 +8,7 @@ const color = "blue";
 const format = "json";
 
 // Wrap the code in an async function
-async function fetchCarImage() {
+async function fetchCarImageLink() {
   try {
     const { data } = await axios.get("https://api.carsxe.com/images", {
       params: {
@@ -20,11 +20,17 @@ async function fetchCarImage() {
         format: format,
       },
     });
-    console.log(data);
+    // Assuming the API returns an object with an array named 'images'
+    if (data && data.images && data.images.length > 0) {
+      const firstImageInfo = data.images[0].link;
+      console.log(firstImageInfo);
+    } else {
+      console.log("No images found for the specified parameters.");
+    }
   } catch (e) {
-    console.error(e);
+    console.error("Error fetching car image:", e);
   }
 }
 
 // Call the async function
-fetchCarImage();
+fetchCarImageLink();

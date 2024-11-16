@@ -44,7 +44,10 @@ components/
 ├── Chart/
 │   ├── LineChart.jsx      # Line chart component for trends
 │   ├── BarChart.jsx       # Bar chart component for comparisons
-│   ├── Chart.css          # Styles for charts
+│   ├── PieChart.jsx       # Pie chart component for comparisons
+│   ├── LineChart.css      # Styles for line charts
+│   ├── BarChart.css       # Styles for bar charts
+│   ├── PieChart.css       # Styles for pie charts
 ├── Table/
 │   ├── DataTable.jsx      # Data table to display raw or processed data
 │   ├── DataTable.css      # Styles for data tables

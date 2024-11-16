@@ -8,6 +8,7 @@ const color = "blue";
 const format = "json";
 
 // Wrap the code in an async function
+
 async function fetchCarImageLink() {
   try {
     const { data } = await axios.get("https://api.carsxe.com/images", {

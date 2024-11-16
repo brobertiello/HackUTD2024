@@ -1,7 +1,7 @@
-
 # **Toyota Vehicle Analytics App**
 
 ## **Project Overview**
+
 The Toyota Vehicle Analytics App is a React-based web application designed for Toyota engineers to analyze and compare vehicle fuel economy data for the years 2021-2025. This application leverages the Pinata API for storing and retrieving vehicle datasets securely. Engineers can view detailed analytics for Toyota's cars, compare them to other vehicles, and gain actionable insights through interactive visualizations and filtering options. The app is intended to run locally for the time being.
 
 ---
@@ -9,6 +9,7 @@ The Toyota Vehicle Analytics App is a React-based web application designed for T
 ## **File Structure Breakdown**
 
 ### **Root Directory**
+
 ```
 root/
 ├── public/
@@ -19,16 +20,20 @@ root/
 ```
 
 ### **Public Folder**
+
 - **`index.html`**: Main HTML file for rendering the React application.
 - **`favicon.ico`**: Toyota-branded favicon.
 
 ---
 
 ### **`src/` Folder**
+
 Contains all source files for the React application.
 
 #### **1. `components/`**
+
 Reusable UI components for the application.
+
 ```
 components/
 ├── Dashboard/
@@ -56,7 +61,9 @@ components/
 ---
 
 #### **2. `features/`**
+
 Encapsulates core logic and utility functions for the app.
+
 ```
 features/
 ├── dataProcessing/
@@ -72,7 +79,9 @@ features/
 ---
 
 #### **3. `pages/`**
+
 Holds top-level pages of the app, corresponding to different routes.
+
 ```
 pages/
 ├── HomePage.jsx           # Landing page of the app
@@ -88,7 +97,9 @@ pages/
 ---
 
 #### **4. `hooks/`**
+
 Custom React hooks for encapsulating reusable logic.
+
 ```
 hooks/
 ├── useFetch.js            # Fetch data from APIs or local files
@@ -98,7 +109,9 @@ hooks/
 ---
 
 #### **5. `services/`**
+
 Handles API communication and backend integration.
+
 ```
 services/
 ├── pinataService.js       # Manages interactions with Pinata (e.g., pinFileToIPFS)
@@ -108,7 +121,9 @@ services/
 ---
 
 #### **6. `utils/`**
+
 Utility functions and constants used across the app.
+
 ```
 utils/
 ├── constants.js           # Constants for endpoints, chart colors, etc.
@@ -118,6 +133,7 @@ utils/
 ---
 
 #### **Other Files**
+
 - **`App.js`**: Root React component managing routing and global state.
 - **`index.js`**: Application entry point rendering the React app.
 - **`App.css`**: Global CSS styles for the application.
@@ -127,19 +143,24 @@ utils/
 ---
 
 ## **Proposed Features**
+
 1. **Dashboard**:
+
    - Display vehicle fuel economy trends with line and bar charts.
    - Highlight key insights and top-performing models.
 
 2. **Toyota Car List**:
+
    - View all Toyota cars from 2021-2025.
    - Filter by year, model type, or specific metrics.
 
 3. **Car Comparison**:
+
    - Compare Toyota cars to other vehicles side-by-side.
    - Use metrics like MPG, emissions, and engine type.
 
 4. **File Uploads**:
+
    - Upload new datasets dynamically using the Pinata API.
    - Store metadata for each file (e.g., year, description).
 
@@ -149,6 +170,7 @@ utils/
 ---
 
 ## **Next Steps**
+
 1. **Set Up Initial Components**:
    - Build `CarList` and `Dashboard` with mock data.
 2. **Integrate Pinata API**:

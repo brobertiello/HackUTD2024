@@ -14,8 +14,11 @@ const App = () => {
                 {/* Route for HomePage */}
                 <Route path="/" element={<HomePage />} />
 
-                {/* Route for DashBoard */}
-                <Route path="/dashboard" element={<DashBoardPage />} />
+                {/* Route for Cars */}
+                <Route path="/cars" element={<HomePage />} />
+
+                {/* Route for Analytics */}
+                <Route path="/analytics" element={<HomePage />} />
                 
                 {/* Future Routes */}
                 {/* Example: */}

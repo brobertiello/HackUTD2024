@@ -2,26 +2,22 @@ import React from 'react';
 import './HomePage.css';
 
 const HomePage = () => {
-    const launchApp = () => {
-        alert('Launching Toyota Vehicle Analytics App!');
-        window.location.href = '/dashboard';
-    };
-
     return (
         <div className="container">
             {/* Logo and Title Centered */}
             <div className="logo-container">
                 <img 
-                    src={require('../assets/ToyotaLogo.png')}
+                    src={require('../assets/ToyotaLogo.png')} 
                     alt="Toyota Logo"
                     className="logo"
                 />
                 <h2>Car Analytics App for Engineers</h2>
             </div>
 
-            {/* Launch Button */}
+            {/* Buttons Row */}
             <div className="row">
-                <button className="launch-button" onClick={launchApp}>Launch</button>
+                <button className="launch-button" onClick={() => window.location.href = '/cars'}>View Cars</button>
+                <button className="launch-button" onClick={() => window.location.href = '/analytics'}>View Analytics</button>
             </div>
 
             {/* Footer Links */}

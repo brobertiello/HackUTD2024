@@ -4,7 +4,7 @@ import './HomePage.css';
 const HomePage = () => {
     const launchApp = () => {
         alert('Launching Toyota Vehicle Analytics App!');
-        window.location.href = '/cars';
+        window.location.href = '/dashboard';
     };
 
     return (

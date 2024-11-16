@@ -10,8 +10,12 @@ const App = () => {
     return (
         <Router>
             <Routes>
+
                 {/* Route for HomePage */}
                 <Route path="/" element={<HomePage />} />
+
+                {/* Route for DashBoard */}
+                <Route path="/dashboard" element={<DashBoardPage />} />
                 
                 {/* Future Routes */}
                 {/* Example: */}

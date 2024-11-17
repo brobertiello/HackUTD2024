@@ -22,7 +22,8 @@ def traverse_car_folders(output_file):
 
                 # Ensure it's a folder
                 if os.path.isdir(model_path):
-                    combination = f"{manufacturer} {model}"
+                    model_word = model.split()[0]
+                    combination = f"{manufacturer},{model_word}"
                     unique_combinations.add(combination)
 
     # Write the unique combinations to the output file

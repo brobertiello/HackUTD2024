@@ -80,7 +80,7 @@ const styles = {
   chartContainer: {
     display: 'flex',
     transition: 'transform 0.5s ease-in-out', // Smooth slide transition
-    width: '200%', // 100% for each chart
+    width: '100%', // Adjust to fit the parent container
     height: '100%',
   },
   chartWrapper: {
@@ -90,6 +90,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden', // Prevent chart overflow
   },
   dotsContainer: {
     position: 'absolute',
@@ -107,6 +108,7 @@ const styles = {
     cursor: 'pointer',
   },
 };
+
 
 
 export default ChartSlider;

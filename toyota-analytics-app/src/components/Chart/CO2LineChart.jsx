@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  Chart as ChartJS,
-} from 'chart.js';
+import { Chart as ChartJS } from 'chart.js';
 
 const CO2LineChart = ({ cars }) => {
   const chartRef = useRef(null);
+
+  console.log(cars);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -16,21 +16,31 @@ const CO2LineChart = ({ cars }) => {
       chartRef.current.chartInstance.destroy();
     }
 
-    // Prepare datasets and labels
-    const labels = cars[0]?.xvalues || [];
-    const datasets = cars.map((car, index) => ({
-      label: car.label,
-      data: car.ycombinedCO2,
-      borderColor: `hsl(${index * 60}, 70%, 50%)`,
-      backgroundColor: `hsl(${index * 60}, 70%, 70%)`,
-      fill: false,
-    }));
+    // Fixed x-axis labels
+    const labels = [2021, 2022, 2023, 2024, 2025];
+
+    // Prepare datasets, ensuring alignment with fixed labels
+    const datasets = cars.map((car, index) => {
+      // Map ycombinedCO2 to fixed labels (assumes cars[0].xvalues aligns with 2021-2025)
+      const data = labels.map((year) => {
+        const yearIndex = car.xvalues?.indexOf(year); // Find index of year in car's data
+        return yearIndex !== -1 ? car.ycombinedCO2[yearIndex] : null; // Use null if year not found
+      });
+
+      return {
+        label: car.label,
+        data,
+        borderColor: `hsl(${index * 60}, 70%, 50%)`,
+        backgroundColor: `hsl(${index * 60}, 70%, 70%)`,
+        fill: false,
+      };
+    });
 
     // Create a new Chart.js instance
     chartRef.current.chartInstance = new ChartJS(ctx, {
       type: 'line',
       data: {
-        labels,
+        labels, // Use fixed labels
         datasets,
       },
       options: {
@@ -72,6 +82,5 @@ const CO2LineChart = ({ cars }) => {
 
   return <canvas ref={chartRef} style={{ height: '100%', width: '100%' }} />;
 };
-
 
 export default CO2LineChart;

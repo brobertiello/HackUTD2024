@@ -50,3 +50,13 @@
     text-align: left;
   }
   
+
+  input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  div.option-item {
+    margin-bottom: 20px;
+  }
+  

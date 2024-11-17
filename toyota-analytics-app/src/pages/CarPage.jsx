@@ -147,8 +147,18 @@ const CarPage = () => {
         }
     };
 
-    const redirectToAnalytics = (carList) => {
-        navigate('/analytics', { state: { carList } });
+    // Define the redirectToAnalysis function
+    const redirectToAnalysis = (cars) => {
+        // 'cars' is an array of [make, model] tuples
+        const carsParam = cars
+            .map(([make, model]) => `${encodeURIComponent(make)}:${encodeURIComponent(model)}`)
+            .join(',');
+
+        // Construct the URL with query parameters
+        const url = `/analysis?cars=${carsParam}`;
+
+        // Navigate to the Analysis page
+        navigate(url);
     };
 
     return (
@@ -216,12 +226,11 @@ const CarPage = () => {
                             <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
                             <div
                                 className="redirect-arrow"
-                                onClick={() => redirectToAnalytics([[selectedManufacturer, selectedModel]])}
+                                onClick={() => redirectToAnalysis([[selectedManufacturer, selectedModel]])}
                                 style={{ cursor: 'pointer' }}
                             >
                                 <span>&#8594;</span>
                             </div>
-
                         </div>
 
                         {imagePath && (

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Analysis.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import getCarImage from '../hooks/getCarImage';
 import { Line } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
+import queryString from 'query-string'; // Ensure this package is installed
 
 // Function to generate a consistent color from a string
 function stringToColor(str) {
@@ -58,7 +59,10 @@ const Analysis = () => {
     const [chartType, setChartType] = useState('MPG');
     const [showForecast, setShowForecast] = useState(false);
     const [comparisonType, setComparisonType] = useState('model'); // 'model' or 'manufacturer'
+
     const navigate = useNavigate();
+    const location = useLocation();
+    const urlParamsProcessed = useRef(false); // UseRef to track URL parameter processing
 
     useEffect(() => {
         const loadManufacturers = async () => {
@@ -81,6 +85,31 @@ const Analysis = () => {
 
         loadManufacturers();
     }, []);
+
+    // UseEffect to handle URL parameters with useRef guard
+    useEffect(() => {
+        if (urlParamsProcessed.current) return; // Prevent running more than once
+        urlParamsProcessed.current = true;
+
+        const params = queryString.parse(location.search);
+
+        if (params.cars) {
+            const carListParam = Array.isArray(params.cars) ? params.cars : [params.cars];
+            carListParam.forEach((car) => {
+                const [make, model] = car.split(':');
+                compareCar(make, model);
+            });
+        }
+
+        if (params.manufacturers) {
+            const manufacturersList = Array.isArray(params.manufacturers)
+                ? params.manufacturers
+                : [params.manufacturers];
+            manufacturersList.forEach((make) => {
+                compareManufacturer(make);
+            });
+        }
+    }, [location.search]);
 
     const handleManufacturerChange = (event) => {
         const manufacturer = event.target.value;
@@ -116,234 +145,238 @@ const Analysis = () => {
         }
     };
 
+    const compareCar = async (make, model) => {
+        const carLabel = `${make} ${model}`;
+
+        // Check if the model is already in the list
+        const isDuplicate = carList.some((car) => car.label === carLabel);
+
+        if (isDuplicate) {
+            return; // Skip adding duplicate
+        }
+
+        try {
+            setIsLoading(true);
+
+            // Fetch the directory.txt inside the model folder
+            const response = await fetch(
+                `/data/manufacturers/${make}/${model}/directory.txt`
+            );
+            if (!response.ok)
+                throw new Error(
+                    `Failed to load years for ${make} ${model}.`
+                );
+            const text = await response.text();
+            const yearFiles = text
+                .split('\n')
+                .filter(Boolean)
+                .map((line) => line.replace('\r', '').trim())
+                .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
+
+            const carDetailsArray = await Promise.all(
+                yearFiles.map(async (yearFileName) => {
+                    try {
+                        const year = parseInt(yearFileName.replace('.txt', ''), 10);
+                        if (isNaN(year)) {
+                            console.error(`Invalid year file name: ${yearFileName}`);
+                            return null;
+                        }
+
+                        const res = await fetch(
+                            `/data/manufacturers/${make}/${model}/${yearFileName}`
+                        );
+                        if (!res.ok)
+                            throw new Error(
+                                `Failed to load details for ${make} ${model} (${year}).`
+                            );
+                        const yearText = await res.text();
+                        const lines = yearText.split('\n').filter(Boolean);
+                        const [mpgLine, co2Line] = lines;
+
+                        if (!mpgLine) {
+                            console.error(`MPG data missing in ${yearFileName}`);
+                            return null;
+                        }
+
+                        const [city, highway, combination] = mpgLine
+                            .split(',')
+                            .map((s) => s.trim());
+                        let co2Data = {};
+                        if (co2Line) {
+                            const [cityCo2, highwayCo2, combinationCo2] = co2Line
+                                .split(',')
+                                .map((s) => s.trim());
+                            co2Data = {
+                                cityCo2: parseFloat(cityCo2),
+                                highwayCo2: parseFloat(highwayCo2),
+                                combinationCo2: parseFloat(combinationCo2),
+                            };
+                        }
+
+                        return {
+                            year,
+                            city: parseFloat(city),
+                            highway: parseFloat(highway),
+                            combination: parseFloat(combination),
+                            cityCo2: co2Data.cityCo2 || null,
+                            highwayCo2: co2Data.highwayCo2 || null,
+                            combinationCo2: co2Data.combinationCo2 || null,
+                        };
+                    } catch (error) {
+                        console.error(`Error loading data for ${yearFileName}:`, error);
+                        return null;
+                    }
+                })
+            );
+
+            const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
+
+            if (filteredCarDetails.length === 0) {
+                alert('No data available for this model.');
+                return;
+            }
+
+            const imagePath = getCarImage(make, model);
+
+            const newCarData = {
+                label: carLabel,
+                xvalues: filteredCarDetails.map((detail) => detail.year),
+                ycity: filteredCarDetails.map((detail) => detail.city),
+                yhighway: filteredCarDetails.map((detail) => detail.highway),
+                ycombined: filteredCarDetails.map((detail) => detail.combination),
+                ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
+                yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
+                ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
+                imagePath,
+            };
+
+            setCarList((prevList) => [...prevList, newCarData]);
+        } catch (error) {
+            console.error('Error comparing model:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const compareManufacturer = async (make) => {
+        const carLabel = `${make} (Average)`;
+
+        // Check if the manufacturer is already in the list
+        const isDuplicate = carList.some((car) => car.label === carLabel);
+
+        if (isDuplicate) {
+            return; // Skip adding duplicate
+        }
+
+        try {
+            setIsLoading(true);
+
+            // Fetch the directory.txt inside the averages folder
+            const response = await fetch(
+                `/data/manufacturers/${make}/averages/directory.txt`
+            );
+            if (!response.ok)
+                throw new Error(`Failed to load average years for ${make}.`);
+            const text = await response.text();
+            const yearFiles = text
+                .split('\n')
+                .filter(Boolean)
+                .map((line) => line.replace('\r', '').trim())
+                .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
+
+            const carDetailsArray = await Promise.all(
+                yearFiles.map(async (yearFileName) => {
+                    try {
+                        const year = parseInt(yearFileName.replace('avg.txt', ''), 10);
+                        if (isNaN(year)) {
+                            console.error(`Invalid year file name: ${yearFileName}`);
+                            return null;
+                        }
+
+                        const res = await fetch(
+                            `/data/manufacturers/${make}/averages/${yearFileName}`
+                        );
+                        if (!res.ok)
+                            throw new Error(
+                                `Failed to load average details for ${make} (${year}).`
+                            );
+                        const yearText = await res.text();
+                        const lines = yearText.split('\n').filter(Boolean);
+                        const [mpgLine, co2Line] = lines;
+
+                        if (!mpgLine) {
+                            console.error(`MPG data missing in ${yearFileName}`);
+                            return null;
+                        }
+
+                        const [city, highway, combination] = mpgLine
+                            .split(',')
+                            .map((s) => s.trim());
+                        let co2Data = {};
+                        if (co2Line) {
+                            const [cityCo2, highwayCo2, combinationCo2] = co2Line
+                                .split(',')
+                                .map((s) => s.trim());
+                            co2Data = {
+                                cityCo2: parseFloat(cityCo2),
+                                highwayCo2: parseFloat(highwayCo2),
+                                combinationCo2: parseFloat(combinationCo2),
+                            };
+                        }
+
+                        return {
+                            year,
+                            city: parseFloat(city),
+                            highway: parseFloat(highway),
+                            combination: parseFloat(combination),
+                            cityCo2: co2Data.cityCo2 || null,
+                            highwayCo2: co2Data.highwayCo2 || null,
+                            combinationCo2: co2Data.combinationCo2 || null,
+                        };
+                    } catch (error) {
+                        console.error(
+                            `Error loading average data for ${yearFileName}:`,
+                            error
+                        );
+                        return null;
+                    }
+                })
+            );
+
+            const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
+
+            if (filteredCarDetails.length === 0) {
+                alert('No average data available for this manufacturer.');
+                return;
+            }
+
+            const newCarData = {
+                label: carLabel,
+                xvalues: filteredCarDetails.map((detail) => detail.year),
+                ycity: filteredCarDetails.map((detail) => detail.city),
+                yhighway: filteredCarDetails.map((detail) => detail.highway),
+                ycombined: filteredCarDetails.map((detail) => detail.combination),
+                ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
+                yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
+                ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
+                imagePath: null, // No image for manufacturer averages
+            };
+
+            setCarList((prevList) => [...prevList, newCarData]);
+        } catch (error) {
+            console.error('Error comparing manufacturer:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleCompare = async () => {
         if (comparisonType === 'manufacturer') {
             if (!selectedManufacturer) return;
-
-            const carLabel = `${selectedManufacturer} (Average)`;
-
-            // Check if the manufacturer is already in the list
-            const isDuplicate = carList.some((car) => car.label === carLabel);
-
-            if (isDuplicate) {
-                alert('This manufacturer is already in the comparison list.');
-                return;
-            }
-
-            try {
-                setIsLoading(true);
-
-                // Fetch the directory.txt inside the averages folder
-                const response = await fetch(
-                    `/data/manufacturers/${selectedManufacturer}/averages/directory.txt`
-                );
-                if (!response.ok)
-                    throw new Error(`Failed to load average years for ${selectedManufacturer}.`);
-                const text = await response.text();
-                const yearFiles = text
-                    .split('\n')
-                    .filter(Boolean)
-                    .map((line) => line.replace('\r', '').trim())
-                    .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
-
-                const carDetailsArray = await Promise.all(
-                    yearFiles.map(async (yearFileName) => {
-                        try {
-                            const year = parseInt(yearFileName.replace('avg.txt', ''), 10);
-                            if (isNaN(year)) {
-                                console.error(`Invalid year file name: ${yearFileName}`);
-                                return null;
-                            }
-
-                            const res = await fetch(
-                                `/data/manufacturers/${selectedManufacturer}/averages/${yearFileName}`
-                            );
-                            if (!res.ok)
-                                throw new Error(
-                                    `Failed to load average details for ${selectedManufacturer} (${year}).`
-                                );
-                            const yearText = await res.text();
-                            const lines = yearText.split('\n').filter(Boolean);
-                            const [mpgLine, co2Line] = lines;
-
-                            if (!mpgLine) {
-                                console.error(`MPG data missing in ${yearFileName}`);
-                                return null;
-                            }
-
-                            const [city, highway, combination] = mpgLine
-                                .split(',')
-                                .map((s) => s.trim());
-                            let co2Data = {};
-                            if (co2Line) {
-                                const [cityCo2, highwayCo2, combinationCo2] = co2Line
-                                    .split(',')
-                                    .map((s) => s.trim());
-                                co2Data = {
-                                    cityCo2: parseFloat(cityCo2),
-                                    highwayCo2: parseFloat(highwayCo2),
-                                    combinationCo2: parseFloat(combinationCo2),
-                                };
-                            }
-
-                            return {
-                                year,
-                                city: parseFloat(city),
-                                highway: parseFloat(highway),
-                                combination: parseFloat(combination),
-                                cityCo2: co2Data.cityCo2 || null,
-                                highwayCo2: co2Data.highwayCo2 || null,
-                                combinationCo2: co2Data.combinationCo2 || null,
-                            };
-                        } catch (error) {
-                            console.error(
-                                `Error loading average data for ${yearFileName}:`,
-                                error
-                            );
-                            return null;
-                        }
-                    })
-                );
-
-                const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
-
-                if (filteredCarDetails.length === 0) {
-                    alert('No average data available for this manufacturer.');
-                    return;
-                }
-
-                const newCarData = {
-                    label: carLabel,
-                    xvalues: filteredCarDetails.map((detail) => detail.year),
-                    ycity: filteredCarDetails.map((detail) => detail.city),
-                    yhighway: filteredCarDetails.map((detail) => detail.highway),
-                    ycombined: filteredCarDetails.map((detail) => detail.combination),
-                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
-                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
-                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
-                    imagePath: null, // No image for manufacturer averages
-                };
-
-                setCarList((prevList) => [...prevList, newCarData]);
-            } catch (error) {
-                console.error('Error comparing manufacturer:', error);
-            } finally {
-                setIsLoading(false);
-            }
+            await compareManufacturer(selectedManufacturer);
         } else if (comparisonType === 'model') {
             if (!selectedManufacturer || !selectedModel) return;
-
-            const carLabel = `${selectedManufacturer} ${selectedModel}`;
-
-            // Check if the model is already in the list
-            const isDuplicate = carList.some((car) => car.label === carLabel);
-
-            if (isDuplicate) {
-                alert('This model is already in the comparison list.');
-                return;
-            }
-
-            try {
-                setIsLoading(true);
-
-                // Fetch the directory.txt inside the model folder
-                const response = await fetch(
-                    `/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`
-                );
-                if (!response.ok)
-                    throw new Error(
-                        `Failed to load years for ${selectedManufacturer} ${selectedModel}.`
-                    );
-                const text = await response.text();
-                const yearFiles = text
-                    .split('\n')
-                    .filter(Boolean)
-                    .map((line) => line.replace('\r', '').trim())
-                    .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
-
-                const carDetailsArray = await Promise.all(
-                    yearFiles.map(async (yearFileName) => {
-                        try {
-                            const year = parseInt(yearFileName.replace('.txt', ''), 10);
-                            if (isNaN(year)) {
-                                console.error(`Invalid year file name: ${yearFileName}`);
-                                return null;
-                            }
-
-                            const res = await fetch(
-                                `/data/manufacturers/${selectedManufacturer}/${selectedModel}/${yearFileName}`
-                            );
-                            if (!res.ok)
-                                throw new Error(
-                                    `Failed to load details for ${selectedManufacturer} ${selectedModel} (${year}).`
-                                );
-                            const yearText = await res.text();
-                            const lines = yearText.split('\n').filter(Boolean);
-                            const [mpgLine, co2Line] = lines;
-
-                            if (!mpgLine) {
-                                console.error(`MPG data missing in ${yearFileName}`);
-                                return null;
-                            }
-
-                            const [city, highway, combination] = mpgLine
-                                .split(',')
-                                .map((s) => s.trim());
-                            let co2Data = {};
-                            if (co2Line) {
-                                const [cityCo2, highwayCo2, combinationCo2] = co2Line
-                                    .split(',')
-                                    .map((s) => s.trim());
-                                co2Data = {
-                                    cityCo2: parseFloat(cityCo2),
-                                    highwayCo2: parseFloat(highwayCo2),
-                                    combinationCo2: parseFloat(combinationCo2),
-                                };
-                            }
-
-                            return {
-                                year,
-                                city: parseFloat(city),
-                                highway: parseFloat(highway),
-                                combination: parseFloat(combination),
-                                cityCo2: co2Data.cityCo2 || null,
-                                highwayCo2: co2Data.highwayCo2 || null,
-                                combinationCo2: co2Data.combinationCo2 || null,
-                            };
-                        } catch (error) {
-                            console.error(`Error loading data for ${yearFileName}:`, error);
-                            return null;
-                        }
-                    })
-                );
-
-                const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
-
-                if (filteredCarDetails.length === 0) {
-                    alert('No data available for this model.');
-                    return;
-                }
-
-                const imagePath = getCarImage(selectedManufacturer, selectedModel);
-
-                const newCarData = {
-                    label: carLabel,
-                    xvalues: filteredCarDetails.map((detail) => detail.year),
-                    ycity: filteredCarDetails.map((detail) => detail.city),
-                    yhighway: filteredCarDetails.map((detail) => detail.highway),
-                    ycombined: filteredCarDetails.map((detail) => detail.combination),
-                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
-                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
-                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
-                    imagePath,
-                };
-
-                setCarList((prevList) => [...prevList, newCarData]);
-            } catch (error) {
-                console.error('Error comparing model:', error);
-            } finally {
-                setIsLoading(false);
-            }
+            await compareCar(selectedManufacturer, selectedModel);
         }
     };
 

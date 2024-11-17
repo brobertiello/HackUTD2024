@@ -56,8 +56,7 @@ const Analysis = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [carList, setCarList] = useState([]);
     const [chartType, setChartType] = useState('MPG');
-    const [showForecast, setShowForecast] = useState(false);
-    const [comparisonType, setComparisonType] = useState('model'); // 'model' or 'manufacturer'
+    const [showForecast, setShowForecast] = useState(false); // New state for forecast option
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -83,7 +82,7 @@ const Analysis = () => {
         const manufacturer = event.target.value;
         setSelectedManufacturer(manufacturer);
         setSelectedModel('');
-        if (manufacturer && comparisonType === 'model') {
+        if (manufacturer) {
             loadModels(manufacturer);
         } else {
             setModels([]);
@@ -111,159 +110,78 @@ const Analysis = () => {
     };
 
     const handleCompare = async () => {
-        if (comparisonType === 'model') {
-            // Existing code for comparing models
-            if (!selectedManufacturer || !selectedModel) return;
+        if (!selectedManufacturer || !selectedModel) return;
 
-            const carLabel = `${selectedManufacturer} ${selectedModel}`;
+        const carLabel = `${selectedManufacturer} ${selectedModel}`;
 
-            // Check if the car is already in the list
-            const isDuplicate = carList.some(car => car.label === carLabel);
+        // Check if the car is already in the list
+        const isDuplicate = carList.some(car => car.label === carLabel);
 
-            if (isDuplicate) {
-                alert('This car is already in the comparison list.');
-                return;
-            }
+        if (isDuplicate) {
+            alert('This car is already in the comparison list.');
+            return;
+        }
 
-            try {
-                setIsLoading(true);
-                const response = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`);
-                if (!response.ok) throw new Error(`Failed to load years for ${selectedModel}.`);
-                const text = await response.text();
-                const years = text.split('\n').filter(Boolean);
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`);
+            if (!response.ok) throw new Error(`Failed to load years for ${selectedModel}.`);
+            const text = await response.text();
+            const years = text.split('\n').filter(Boolean);
 
-                const carDetailsArray = await Promise.all(
-                    years.map(async (year) => {
-                        try {
-                            const res = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/${year}.txt`);
-                            if (!res.ok) throw new Error(`Failed to load details for ${selectedModel} (${year}).`);
-                            const yearText = await res.text();
-                            const lines = yearText.split('\n').filter(Boolean);
-                            const [mpgLine, co2Line] = lines;
-                            const [city, highway, combination] = mpgLine.split(',');
-                            let co2Data = {};
-                            if (co2Line) {
-                                const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
-                                co2Data = {
-                                    cityCo2: parseFloat(cityCo2.trim()),
-                                    highwayCo2: parseFloat(highwayCo2.trim()),
-                                    combinationCo2: parseFloat(combinationCo2.trim()),
-                                };
-                            }
-                            return {
-                                year,
-                                city: parseFloat(city.trim()),
-                                highway: parseFloat(highway.trim()),
-                                combination: parseFloat(combination.trim()),
-                                cityCo2: co2Data.cityCo2 || null,
-                                highwayCo2: co2Data.highwayCo2 || null,
-                                combinationCo2: co2Data.combinationCo2 || null,
+            const carDetailsArray = await Promise.all(
+                years.map(async (year) => {
+                    try {
+                        const res = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/${year}.txt`);
+                        if (!res.ok) throw new Error(`Failed to load details for ${selectedModel} (${year}).`);
+                        const yearText = await res.text();
+                        const lines = yearText.split('\n').filter(Boolean);
+                        const [mpgLine, co2Line] = lines;
+                        const [city, highway, combination] = mpgLine.split(',');
+                        let co2Data = {};
+                        if (co2Line) {
+                            const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
+                            co2Data = {
+                                cityCo2: parseFloat(cityCo2.trim()),
+                                highwayCo2: parseFloat(highwayCo2.trim()),
+                                combinationCo2: parseFloat(combinationCo2.trim()),
                             };
-                        } catch (error) {
-                            console.error(`Error loading data for ${year}:`, error);
-                            return null;
                         }
-                    })
-                );
+                        return {
+                            year,
+                            city: parseFloat(city.trim()),
+                            highway: parseFloat(highway.trim()),
+                            combination: parseFloat(combination.trim()),
+                            cityCo2: co2Data.cityCo2 || null,
+                            highwayCo2: co2Data.highwayCo2 || null,
+                            combinationCo2: co2Data.combinationCo2 || null,
+                        };
+                    } catch (error) {
+                        console.error(`Error loading data for ${year}:`, error);
+                        return null;
+                    }
+                })
+            );
 
-                const filteredCarDetails = carDetailsArray.filter(detail => detail !== null);
+            const filteredCarDetails = carDetailsArray.filter(detail => detail !== null);
 
-                const newCarData = {
-                    label: carLabel,
-                    xvalues: filteredCarDetails.map((detail) => detail.year),
-                    ycity: filteredCarDetails.map((detail) => detail.city),
-                    yhighway: filteredCarDetails.map((detail) => detail.highway),
-                    ycombined: filteredCarDetails.map((detail) => detail.combination),
-                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
-                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
-                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
-                    imagePath: getCarImage(selectedManufacturer, selectedModel),
-                };
+            const newCarData = {
+                label: carLabel,
+                xvalues: filteredCarDetails.map((detail) => detail.year),
+                ycity: filteredCarDetails.map((detail) => detail.city),
+                yhighway: filteredCarDetails.map((detail) => detail.highway),
+                ycombined: filteredCarDetails.map((detail) => detail.combination),
+                ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
+                yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
+                ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
+                imagePath: getCarImage(selectedManufacturer, selectedModel),
+            };
 
-                setCarList((prevList) => [...prevList, newCarData]);
-            } catch (error) {
-                console.error("Error comparing car:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        } else if (comparisonType === 'manufacturer') {
-            // New code for comparing manufacturers
-            if (!selectedManufacturer) return;
-
-            const carLabel = `${selectedManufacturer} (Average)`;
-
-            // Check if the manufacturer is already in the list
-            const isDuplicate = carList.some(car => car.label === carLabel);
-
-            if (isDuplicate) {
-                alert('This manufacturer is already in the comparison list.');
-                return;
-            }
-
-            try {
-                setIsLoading(true);
-
-                // Fetch the directory.txt inside the averages folder
-                const response = await fetch(`/data/manufacturers/${selectedManufacturer}/averages/directory.txt`);
-                if (!response.ok) throw new Error(`Failed to load average years for ${selectedManufacturer}.`);
-                const text = await response.text();
-                const yearFiles = text.split('\n').filter(Boolean);
-
-                const carDetailsArray = await Promise.all(
-                    yearFiles.map(async (yearFileName) => {
-                        try {
-                            const year = yearFileName.replace('avg.txt', '');
-                            const res = await fetch(`/data/manufacturers/${selectedManufacturer}/averages/${yearFileName}`);
-                            if (!res.ok) throw new Error(`Failed to load average details for ${selectedManufacturer} (${year}).`);
-                            const yearText = await res.text();
-                            const lines = yearText.split('\n').filter(Boolean);
-                            const [mpgLine, co2Line] = lines;
-                            const [city, highway, combination] = mpgLine.split(',');
-                            let co2Data = {};
-                            if (co2Line) {
-                                const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
-                                co2Data = {
-                                    cityCo2: parseFloat(cityCo2.trim()),
-                                    highwayCo2: parseFloat(highwayCo2.trim()),
-                                    combinationCo2: parseFloat(combinationCo2.trim()),
-                                };
-                            }
-                            return {
-                                year,
-                                city: parseFloat(city.trim()),
-                                highway: parseFloat(highway.trim()),
-                                combination: parseFloat(combination.trim()),
-                                cityCo2: co2Data.cityCo2 || null,
-                                highwayCo2: co2Data.highwayCo2 || null,
-                                combinationCo2: co2Data.combinationCo2 || null,
-                            };
-                        } catch (error) {
-                            console.error(`Error loading average data for ${yearFileName}:`, error);
-                            return null;
-                        }
-                    })
-                );
-
-                const filteredCarDetails = carDetailsArray.filter(detail => detail !== null);
-
-                const newCarData = {
-                    label: carLabel,
-                    xvalues: filteredCarDetails.map((detail) => detail.year),
-                    ycity: filteredCarDetails.map((detail) => detail.city),
-                    yhighway: filteredCarDetails.map((detail) => detail.highway),
-                    ycombined: filteredCarDetails.map((detail) => detail.combination),
-                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
-                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
-                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
-                    imagePath: null, // No image for manufacturer averages
-                };
-
-                setCarList((prevList) => [...prevList, newCarData]);
-            } catch (error) {
-                console.error("Error comparing manufacturer:", error);
-            } finally {
-                setIsLoading(false);
-            }
+            setCarList((prevList) => [...prevList, newCarData]);
+        } catch (error) {
+            console.error("Error comparing car:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -312,8 +230,6 @@ const Analysis = () => {
                         backgroundColor: color,
                         borderDash: [5, 5], // Dashed line
                         tension: 0.1,
-                        // Exclude from legend by setting custom property
-                        showInLegend: false,
                     };
                 }
             }
@@ -372,16 +288,6 @@ const Analysis = () => {
                     },
                 },
             },
-            plugins: {
-                legend: {
-                    labels: {
-                        filter: function (legendItem, data) {
-                            // Exclude forecasted datasets from the legend
-                            return !legendItem.text.includes('(Forecast)');
-                        },
-                    },
-                },
-            },
         };
 
         return (
@@ -394,32 +300,7 @@ const Analysis = () => {
     return (
         <div className="analysis-page">
             <div className="left-card">
-                <h2>Select Comparison Type</h2>
-                <div className="comparison-type">
-                    <button
-                        onClick={() => {
-                            setComparisonType('model');
-                            setSelectedManufacturer('');
-                            setSelectedModel('');
-                            setModels([]);
-                        }}
-                        className={comparisonType === 'model' ? 'active' : ''}
-                    >
-                        Compare Models
-                    </button>
-                    <button
-                        onClick={() => {
-                            setComparisonType('manufacturer');
-                            setSelectedManufacturer('');
-                            setSelectedModel('');
-                            setModels([]);
-                        }}
-                        className={comparisonType === 'manufacturer' ? 'active' : ''}
-                    >
-                        Compare Manufacturers
-                    </button>
-                </div>
-
+                <h2>Select Car to Compare</h2>
                 <div className="selector">
                     <label htmlFor="manufacturer-select">Manufacturer:</label>
                     <select
@@ -436,32 +317,24 @@ const Analysis = () => {
                     </select>
                 </div>
 
-                {comparisonType === 'model' && (
-                    <div className="selector">
-                        <label htmlFor="model-select">Model:</label>
-                        <select
-                            id="model-select"
-                            value={selectedModel}
-                            onChange={handleModelChange}
-                            disabled={!selectedManufacturer || models.length === 0}
-                        >
-                            <option value="">--Select Model--</option>
-                            {models.map((model, index) => (
-                                <option key={index} value={model}>
-                                    {model}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
+                <div className="selector">
+                    <label htmlFor="model-select">Model:</label>
+                    <select
+                        id="model-select"
+                        value={selectedModel}
+                        onChange={handleModelChange}
+                        disabled={!selectedManufacturer || models.length === 0}
+                    >
+                        <option value="">--Select Model--</option>
+                        {models.map((model, index) => (
+                            <option key={index} value={model}>
+                                {model}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-                <button
-                    onClick={handleCompare}
-                    disabled={
-                        (comparisonType === 'model' && !selectedModel) ||
-                        (comparisonType === 'manufacturer' && !selectedManufacturer)
-                    }
-                >
+                <button onClick={handleCompare} disabled={!selectedModel}>
                     Compare
                 </button>
 
@@ -483,7 +356,7 @@ const Analysis = () => {
 
             <div className="right-cards">
                 <div className="top-card">
-                    <h2>Selected Comparisons</h2>
+                    <h2>Selected Cars</h2>
                     <div className="car-list">
                         {carList.map((car, index) => (
                             <div className="car-item" key={index}>
@@ -504,7 +377,7 @@ const Analysis = () => {
                                 )}
                             </div>
                         ))}
-                        {carList.length === 0 && <p>No comparisons selected.</p>}
+                        {carList.length === 0 && <p>No cars selected.</p>}
                     </div>
                 </div>
 

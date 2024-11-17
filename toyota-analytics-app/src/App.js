@@ -6,6 +6,8 @@ import HomePage from './pages/HomePage';
 import CarPage from './pages/CarPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 
+import Analysis from './pages/Analysis';
+
 const App = () => {
     return (
         <Router>
@@ -19,6 +21,9 @@ const App = () => {
 
                 {/* Route for Analytics */}
                 <Route path="/analytics" element={<AnalyticsPage />} />
+
+                {/* Route for Analysis */}
+                <Route path="/analysis" element={<Analysis />} />
                 
                 {/* Future Routes */}
                 {/* Example: */}

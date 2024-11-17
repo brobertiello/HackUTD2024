@@ -1,14 +1,8 @@
 const axios = require("axios");
+require("dotenv").config({ path: "../.env" });
 
 // Define the function to fetch the car image based on parameters
-async function fetchCarImageLink({
-  apiKey = "09nftuhkq_qa1dx6n5x_e8ddx6tpv",
-  make,
-  model,
-  year,
-  color,
-  format = "json",
-}) {
+async function fetchCarImageLink({ apiKey = process.env.CARSXE_API_KEY, make, model, year, color, format = "json" }) {
   try {
     const { data } = await axios.get("https://api.carsxe.com/images", {
       params: {
@@ -36,5 +30,5 @@ async function fetchCarImageLink({
   }
 }
 
-// Call the async function
-fetchCarImageLink();
+// // Call the async function
+// fetchCarImageLink();

@@ -55,7 +55,7 @@ const HomePage = () => {
                                 className="logo"
                             />
                         </a>
-                        <h2>Car Analytics App for Engineers</h2>
+                        <h2>ToyoTrends: A Car Analytics App for Toyota Engineers</h2>
                     </div>
 
                     {/* Buttons Row */}

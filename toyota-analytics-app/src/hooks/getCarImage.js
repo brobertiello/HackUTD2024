@@ -9,9 +9,9 @@ function getCarImage(make, model) {
     const formattedModel = model.split(" ")[0];
 
     // Construct the file path
-    const imagePath = `/data/carImages/${formattedMake}${formattedModel}.png`;
-
-    return imagePath;
+    const imagePath = `/data/carImages/${formattedMake}_${formattedModel}.png`;
+    
+    return imagePath.replace("__", "_");;
 }
 
 export default getCarImage;

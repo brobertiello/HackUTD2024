@@ -20,7 +20,7 @@ function forecastData(years, values, futureYears = 5) {
     if (years.length < 2) return { years: [], values: [] }; // Not enough data to forecast
 
     // Convert years to numbers
-    const numericYears = years.map(year => parseInt(year, 10));
+    const numericYears = years.map((year) => parseInt(year, 10));
     const xMean = numericYears.reduce((a, b) => a + b, 0) / numericYears.length;
     const yMean = values.reduce((a, b) => a + b, 0) / values.length;
 
@@ -56,7 +56,8 @@ const Analysis = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [carList, setCarList] = useState([]);
     const [chartType, setChartType] = useState('MPG');
-    const [showForecast, setShowForecast] = useState(false); // New state for forecast option
+    const [showForecast, setShowForecast] = useState(false);
+    const [comparisonType, setComparisonType] = useState('model'); // 'model' or 'manufacturer'
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -66,10 +67,13 @@ const Analysis = () => {
                 const response = await fetch('/data/manufacturers/directory.txt');
                 if (!response.ok) throw new Error('Failed to load manufacturers.');
                 const text = await response.text();
-                const manufacturers = text.split('\n').filter(Boolean);
+                const manufacturers = text
+                    .split('\n')
+                    .filter(Boolean)
+                    .map((line) => line.replace('\r', '').trim());
                 setManufacturers(manufacturers);
             } catch (error) {
-                console.error("Error loading manufacturers:", error);
+                console.error('Error loading manufacturers:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -82,7 +86,7 @@ const Analysis = () => {
         const manufacturer = event.target.value;
         setSelectedManufacturer(manufacturer);
         setSelectedModel('');
-        if (manufacturer) {
+        if (manufacturer && comparisonType === 'model') {
             loadModels(manufacturer);
         } else {
             setModels([]);
@@ -100,88 +104,246 @@ const Analysis = () => {
             const response = await fetch(`/data/manufacturers/${manufacturer}/directory.txt`);
             if (!response.ok) throw new Error(`Failed to load models for ${manufacturer}.`);
             const text = await response.text();
-            const models = text.split('\n').filter(Boolean);
+            const models = text
+                .split('\n')
+                .filter(Boolean)
+                .map((line) => line.replace('\r', '').trim());
             setModels(models);
         } catch (error) {
-            console.error("Error loading models:", error);
+            console.error('Error loading models:', error);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleCompare = async () => {
-        if (!selectedManufacturer || !selectedModel) return;
+        if (comparisonType === 'manufacturer') {
+            if (!selectedManufacturer) return;
 
-        const carLabel = `${selectedManufacturer} ${selectedModel}`;
+            const carLabel = `${selectedManufacturer} (Average)`;
 
-        // Check if the car is already in the list
-        const isDuplicate = carList.some(car => car.label === carLabel);
+            // Check if the manufacturer is already in the list
+            const isDuplicate = carList.some((car) => car.label === carLabel);
 
-        if (isDuplicate) {
-            alert('This car is already in the comparison list.');
-            return;
-        }
+            if (isDuplicate) {
+                alert('This manufacturer is already in the comparison list.');
+                return;
+            }
 
-        try {
-            setIsLoading(true);
-            const response = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`);
-            if (!response.ok) throw new Error(`Failed to load years for ${selectedModel}.`);
-            const text = await response.text();
-            const years = text.split('\n').filter(Boolean);
+            try {
+                setIsLoading(true);
 
-            const carDetailsArray = await Promise.all(
-                years.map(async (year) => {
-                    try {
-                        const res = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/${year}.txt`);
-                        if (!res.ok) throw new Error(`Failed to load details for ${selectedModel} (${year}).`);
-                        const yearText = await res.text();
-                        const lines = yearText.split('\n').filter(Boolean);
-                        const [mpgLine, co2Line] = lines;
-                        const [city, highway, combination] = mpgLine.split(',');
-                        let co2Data = {};
-                        if (co2Line) {
-                            const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
-                            co2Data = {
-                                cityCo2: parseFloat(cityCo2.trim()),
-                                highwayCo2: parseFloat(highwayCo2.trim()),
-                                combinationCo2: parseFloat(combinationCo2.trim()),
+                // Fetch the directory.txt inside the averages folder
+                const response = await fetch(
+                    `/data/manufacturers/${selectedManufacturer}/averages/directory.txt`
+                );
+                if (!response.ok)
+                    throw new Error(`Failed to load average years for ${selectedManufacturer}.`);
+                const text = await response.text();
+                const yearFiles = text
+                    .split('\n')
+                    .filter(Boolean)
+                    .map((line) => line.replace('\r', '').trim())
+                    .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
+
+                const carDetailsArray = await Promise.all(
+                    yearFiles.map(async (yearFileName) => {
+                        try {
+                            const year = parseInt(yearFileName.replace('avg.txt', ''), 10);
+                            if (isNaN(year)) {
+                                console.error(`Invalid year file name: ${yearFileName}`);
+                                return null;
+                            }
+
+                            const res = await fetch(
+                                `/data/manufacturers/${selectedManufacturer}/averages/${yearFileName}`
+                            );
+                            if (!res.ok)
+                                throw new Error(
+                                    `Failed to load average details for ${selectedManufacturer} (${year}).`
+                                );
+                            const yearText = await res.text();
+                            const lines = yearText.split('\n').filter(Boolean);
+                            const [mpgLine, co2Line] = lines;
+
+                            if (!mpgLine) {
+                                console.error(`MPG data missing in ${yearFileName}`);
+                                return null;
+                            }
+
+                            const [city, highway, combination] = mpgLine
+                                .split(',')
+                                .map((s) => s.trim());
+                            let co2Data = {};
+                            if (co2Line) {
+                                const [cityCo2, highwayCo2, combinationCo2] = co2Line
+                                    .split(',')
+                                    .map((s) => s.trim());
+                                co2Data = {
+                                    cityCo2: parseFloat(cityCo2),
+                                    highwayCo2: parseFloat(highwayCo2),
+                                    combinationCo2: parseFloat(combinationCo2),
+                                };
+                            }
+
+                            return {
+                                year,
+                                city: parseFloat(city),
+                                highway: parseFloat(highway),
+                                combination: parseFloat(combination),
+                                cityCo2: co2Data.cityCo2 || null,
+                                highwayCo2: co2Data.highwayCo2 || null,
+                                combinationCo2: co2Data.combinationCo2 || null,
                             };
+                        } catch (error) {
+                            console.error(
+                                `Error loading average data for ${yearFileName}:`,
+                                error
+                            );
+                            return null;
                         }
-                        return {
-                            year,
-                            city: parseFloat(city.trim()),
-                            highway: parseFloat(highway.trim()),
-                            combination: parseFloat(combination.trim()),
-                            cityCo2: co2Data.cityCo2 || null,
-                            highwayCo2: co2Data.highwayCo2 || null,
-                            combinationCo2: co2Data.combinationCo2 || null,
-                        };
-                    } catch (error) {
-                        console.error(`Error loading data for ${year}:`, error);
-                        return null;
-                    }
-                })
-            );
+                    })
+                );
 
-            const filteredCarDetails = carDetailsArray.filter(detail => detail !== null);
+                const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
 
-            const newCarData = {
-                label: carLabel,
-                xvalues: filteredCarDetails.map((detail) => detail.year),
-                ycity: filteredCarDetails.map((detail) => detail.city),
-                yhighway: filteredCarDetails.map((detail) => detail.highway),
-                ycombined: filteredCarDetails.map((detail) => detail.combination),
-                ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
-                yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
-                ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
-                imagePath: getCarImage(selectedManufacturer, selectedModel),
-            };
+                if (filteredCarDetails.length === 0) {
+                    alert('No average data available for this manufacturer.');
+                    return;
+                }
 
-            setCarList((prevList) => [...prevList, newCarData]);
-        } catch (error) {
-            console.error("Error comparing car:", error);
-        } finally {
-            setIsLoading(false);
+                const newCarData = {
+                    label: carLabel,
+                    xvalues: filteredCarDetails.map((detail) => detail.year),
+                    ycity: filteredCarDetails.map((detail) => detail.city),
+                    yhighway: filteredCarDetails.map((detail) => detail.highway),
+                    ycombined: filteredCarDetails.map((detail) => detail.combination),
+                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
+                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
+                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
+                    imagePath: null, // No image for manufacturer averages
+                };
+
+                setCarList((prevList) => [...prevList, newCarData]);
+            } catch (error) {
+                console.error('Error comparing manufacturer:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        } else if (comparisonType === 'model') {
+            if (!selectedManufacturer || !selectedModel) return;
+
+            const carLabel = `${selectedManufacturer} ${selectedModel}`;
+
+            // Check if the model is already in the list
+            const isDuplicate = carList.some((car) => car.label === carLabel);
+
+            if (isDuplicate) {
+                alert('This model is already in the comparison list.');
+                return;
+            }
+
+            try {
+                setIsLoading(true);
+
+                // Fetch the directory.txt inside the model folder
+                const response = await fetch(
+                    `/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`
+                );
+                if (!response.ok)
+                    throw new Error(
+                        `Failed to load years for ${selectedManufacturer} ${selectedModel}.`
+                    );
+                const text = await response.text();
+                const yearFiles = text
+                    .split('\n')
+                    .filter(Boolean)
+                    .map((line) => line.replace('\r', '').trim())
+                    .map((filename) => (filename.endsWith('.txt') ? filename : `${filename}.txt`));
+
+                const carDetailsArray = await Promise.all(
+                    yearFiles.map(async (yearFileName) => {
+                        try {
+                            const year = parseInt(yearFileName.replace('.txt', ''), 10);
+                            if (isNaN(year)) {
+                                console.error(`Invalid year file name: ${yearFileName}`);
+                                return null;
+                            }
+
+                            const res = await fetch(
+                                `/data/manufacturers/${selectedManufacturer}/${selectedModel}/${yearFileName}`
+                            );
+                            if (!res.ok)
+                                throw new Error(
+                                    `Failed to load details for ${selectedManufacturer} ${selectedModel} (${year}).`
+                                );
+                            const yearText = await res.text();
+                            const lines = yearText.split('\n').filter(Boolean);
+                            const [mpgLine, co2Line] = lines;
+
+                            if (!mpgLine) {
+                                console.error(`MPG data missing in ${yearFileName}`);
+                                return null;
+                            }
+
+                            const [city, highway, combination] = mpgLine
+                                .split(',')
+                                .map((s) => s.trim());
+                            let co2Data = {};
+                            if (co2Line) {
+                                const [cityCo2, highwayCo2, combinationCo2] = co2Line
+                                    .split(',')
+                                    .map((s) => s.trim());
+                                co2Data = {
+                                    cityCo2: parseFloat(cityCo2),
+                                    highwayCo2: parseFloat(highwayCo2),
+                                    combinationCo2: parseFloat(combinationCo2),
+                                };
+                            }
+
+                            return {
+                                year,
+                                city: parseFloat(city),
+                                highway: parseFloat(highway),
+                                combination: parseFloat(combination),
+                                cityCo2: co2Data.cityCo2 || null,
+                                highwayCo2: co2Data.highwayCo2 || null,
+                                combinationCo2: co2Data.combinationCo2 || null,
+                            };
+                        } catch (error) {
+                            console.error(`Error loading data for ${yearFileName}:`, error);
+                            return null;
+                        }
+                    })
+                );
+
+                const filteredCarDetails = carDetailsArray.filter((detail) => detail !== null);
+
+                if (filteredCarDetails.length === 0) {
+                    alert('No data available for this model.');
+                    return;
+                }
+
+                const imagePath = getCarImage(selectedManufacturer, selectedModel);
+
+                const newCarData = {
+                    label: carLabel,
+                    xvalues: filteredCarDetails.map((detail) => detail.year),
+                    ycity: filteredCarDetails.map((detail) => detail.city),
+                    yhighway: filteredCarDetails.map((detail) => detail.highway),
+                    ycombined: filteredCarDetails.map((detail) => detail.combination),
+                    ycityCO2: filteredCarDetails.map((detail) => detail.cityCo2),
+                    yhighwayCO2: filteredCarDetails.map((detail) => detail.highwayCo2),
+                    ycombinedCO2: filteredCarDetails.map((detail) => detail.combinationCo2),
+                    imagePath,
+                };
+
+                setCarList((prevList) => [...prevList, newCarData]);
+            } catch (error) {
+                console.error('Error comparing model:', error);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -192,71 +354,79 @@ const Analysis = () => {
     const renderChart = () => {
         if (carList.length === 0) return <p>No cars to compare.</p>;
 
-        const datasets = carList.map((car) => {
-            const color = stringToColor(car.label);
-            let dataPoints = car.xvalues.map((year, idx) => {
-                if (chartType === 'MPG') {
-                    return {
-                        x: year,
-                        y: car.ycombined[idx],
-                    };
-                } else {
-                    return {
-                        x: year,
-                        y: car.ycombinedCO2[idx],
-                    };
+        const datasets = carList
+            .map((car) => {
+                const color = stringToColor(car.label);
+                let dataPoints = car.xvalues.map((year, idx) => {
+                    if (chartType === 'MPG') {
+                        return {
+                            x: year,
+                            y: car.ycombined[idx],
+                        };
+                    } else {
+                        return {
+                            x: year,
+                            y: car.ycombinedCO2[idx],
+                        };
+                    }
+                });
+
+                let forecastDataset = null;
+                if (showForecast) {
+                    // Perform forecasting
+                    const historicalYears = car.xvalues;
+                    const historicalValues = dataPoints.map((point) => point.y);
+
+                    const { years: forecastYears, values: forecastValues } = forecastData(
+                        historicalYears,
+                        historicalValues,
+                        5
+                    );
+
+                    if (forecastYears.length > 0) {
+                        const forecastDataPoints = forecastYears.map((year, idx) => ({
+                            x: year,
+                            y: forecastValues[idx],
+                        }));
+
+                        forecastDataset = {
+                            label: `${car.label} (Forecast)`,
+                            data: forecastDataPoints,
+                            fill: false,
+                            borderColor: color,
+                            backgroundColor: color,
+                            borderDash: [5, 5], // Dashed line
+                            tension: 0.1,
+                            // Exclude from legend by setting custom property
+                            showInLegend: false,
+                        };
+                    }
                 }
-            });
 
-            let forecastDataset = null;
-            if (showForecast) {
-                // Perform forecasting
-                const historicalYears = car.xvalues;
-                const historicalValues = dataPoints.map(point => point.y);
-
-                const { years: forecastYears, values: forecastValues } = forecastData(historicalYears, historicalValues, 5);
-
-                if (forecastYears.length > 0) {
-                    const forecastDataPoints = forecastYears.map((year, idx) => ({
-                        x: year,
-                        y: forecastValues[idx],
-                    }));
-
-                    forecastDataset = {
-                        label: `${car.label} (Forecast)`,
-                        data: forecastDataPoints,
+                const datasets = [
+                    {
+                        label: car.label,
+                        data: dataPoints,
                         fill: false,
                         borderColor: color,
                         backgroundColor: color,
-                        borderDash: [5, 5], // Dashed line
                         tension: 0.1,
-                    };
+                    },
+                ];
+
+                if (forecastDataset) {
+                    datasets.push(forecastDataset);
                 }
-            }
 
-            const datasets = [
-                {
-                    label: car.label,
-                    data: dataPoints,
-                    fill: false,
-                    borderColor: color,
-                    backgroundColor: color,
-                    tension: 0.1,
-                },
-            ];
-
-            if (forecastDataset) {
-                datasets.push(forecastDataset);
-            }
-
-            return datasets;
-        }).flat();
+                return datasets;
+            })
+            .flat();
 
         // Combine all x-axis labels
         const xLabelsSet = new Set();
-        carList.forEach(car => car.xvalues.forEach(year => xLabelsSet.add(year)));
+        carList.forEach((car) => car.xvalues.forEach((year) => xLabelsSet.add(year)));
         if (showForecast) {
-            carList.forEach(car => {
+            carList.forEach((car) => {
                 // Generate forecast years
                 const lastYear = parseInt(car.xvalues[car.xvalues.length - 1], 10);
                 for (let i = 1; i <= 5; i++) {
@@ -288,6 +458,16 @@ const Analysis = () => {
                     },
                 },
             },
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem) {
+                            // Exclude forecasted datasets from the legend
+                            return !legendItem.text.includes('(Forecast)');
+                        },
+                    },
+                },
+            },
         };
 
         return (
@@ -300,7 +480,32 @@ const Analysis = () => {
     return (
         <div className="analysis-page">
             <div className="left-card">
-                <h2>Select Car to Compare</h2>
+                <h2>Select Comparison Type</h2>
+                <div className="comparison-type">
+                    <button
+                        onClick={() => {
+                            setComparisonType('model');
+                            setSelectedManufacturer('');
+                            setSelectedModel('');
+                            setModels([]);
+                        }}
+                        className={comparisonType === 'model' ? 'active' : ''}
+                    >
+                        Compare Models
+                    </button>
+                    <button
+                        onClick={() => {
+                            setComparisonType('manufacturer');
+                            setSelectedManufacturer('');
+                            setSelectedModel('');
+                            setModels([]);
+                        }}
+                        className={comparisonType === 'manufacturer' ? 'active' : ''}
+                    >
+                        Compare Manufacturers
+                    </button>
+                </div>
+
                 <div className="selector">
                     <label htmlFor="manufacturer-select">Manufacturer:</label>
                     <select
@@ -308,82 +513,69 @@ const Analysis = () => {
                         value={selectedManufacturer}
                         onChange={handleManufacturerChange}
                     >
-                        <option value="">--Select Manufacturer--</option>
-                        {manufacturers.map((manufacturer, index) => (
-                            <option key={index} value={manufacturer}>
+                        <option value="">-- Select Manufacturer --</option>
+                        {manufacturers.map((manufacturer, idx) => (
+                            <option key={idx} value={manufacturer}>
                                 {manufacturer}
                             </option>
                         ))}
                     </select>
                 </div>
-
-                <div className="selector">
-                    <label htmlFor="model-select">Model:</label>
-                    <select
-                        id="model-select"
-                        value={selectedModel}
-                        onChange={handleModelChange}
-                        disabled={!selectedManufacturer || models.length === 0}
-                    >
-                        <option value="">--Select Model--</option>
-                        {models.map((model, index) => (
-                            <option key={index} value={model}>
-                                {model}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <button onClick={handleCompare} disabled={!selectedModel}>
-                    Compare
+                {comparisonType === 'model' && models.length > 0 && (
+                    <div className="selector">
+                        <label htmlFor="model-select">Model:</label>
+                        <select
+                            id="model-select"
+                            value={selectedModel}
+                            onChange={handleModelChange}
+                        >
+                            <option value="">-- Select Model --</option>
+                            {models.map((model, idx) => (
+                                <option key={idx} value={model}>
+                                    {model}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                <button
+                    className="compare-button"
+                    onClick={handleCompare}
+                    disabled={
+                        !selectedManufacturer || (comparisonType === 'model' && !selectedModel)
+                    }
+                >
+                    Add to Comparison
                 </button>
-
-                {/* Horizontal line */}
-                <hr style={{ margin: '20px 0' }} />
-
-                {/* Forecast Option */}
-                <div className="forecast-option">
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showForecast}
-                            onChange={(e) => setShowForecast(e.target.checked)}
-                        />
-                        Show Future Forecasts (Next 5 Years)
-                    </label>
-                </div>
+                <button
+                    onClick={() => setShowForecast(!showForecast)}
+                    className={`forecast-button ${showForecast ? 'active' : ''}`}
+                >
+                    {showForecast ? 'Disable Forecast' : 'Enable Forecast'}
+                </button>
             </div>
 
             <div className="right-cards">
                 <div className="top-card">
-                    <h2>Selected Cars</h2>
                     <div className="car-list">
-                        {carList.map((car, index) => (
-                            <div className="car-item" key={index}>
-                                <div className="car-header">
-                                    <h3>{car.label}</h3>
-                                    <button onClick={() => removeCar(index)}>×</button>
-                                </div>
-                                {car.imagePath && (
-                                    <img
-                                        src={car.imagePath}
-                                        alt={car.label}
-                                        className="car-image"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = '/data/carImages/default.png';
-                                        }}
-                                    />
+                        {carList.map((car, idx) => (
+                            <div className="car-card" key={idx}>
+                                {car.imagePath ? (
+                                    <img src={car.imagePath} alt={car.label} className="car-image" />
+                                ) : (
+                                    <div className="no-image">No Image Available</div>
                                 )}
+                                <span className="car-title">{car.label}</span>
+                                <button className="remove-button" onClick={() => removeCar(idx)}>
+                                    X
+                                </button>
                             </div>
                         ))}
-                        {carList.length === 0 && <p>No cars selected.</p>}
                     </div>
                 </div>
-
                 <div className="bottom-card">
-                    <h2>Analysis Chart</h2>
-                    <div className="chart-toggle">
+                    <h2>Performance Chart</h2>
+                    <div className="chart-type-buttons">
                         <button
                             onClick={() => setChartType('MPG')}
                             className={chartType === 'MPG' ? 'active' : ''}
@@ -394,11 +586,10 @@ const Analysis = () => {
                             onClick={() => setChartType('CO2')}
                             className={chartType === 'CO2' ? 'active' : ''}
                         >
-                            CO<sub>2</sub> Emissions
+                            CO₂ Emissions
                         </button>
                     </div>
-                    {isLoading && <div className="loading">Loading...</div>}
-                    {!isLoading && renderChart()}
+                    {renderChart()}
                 </div>
             </div>
         </div>

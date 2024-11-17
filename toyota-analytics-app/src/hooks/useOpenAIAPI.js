@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 // API base configuration
 const client = {
   baseUrl: "https://api.sambanova.ai/v1",
-  apiKey: "e9f9e775-f7fc-4535-9cf5-22452a45fcf9",//process.env.SAMBANOVA_API_KEY,
+  apiKey: process.env.SAMBANOVA_API_KEY,
 };
 
 // Multi-line system prompt configuration

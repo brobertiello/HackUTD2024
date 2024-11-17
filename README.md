@@ -99,6 +99,8 @@ The entire project was completed in under 24 hours as part of [HackUTD XI](https
    - lucas.ho-1@ou.edu
    - [LinkedIn](https://www.linkedin.com/in/lucas-t-ho/)
 - **Bryan Ho**
+   - bryan.v.ho-1@ou.edu
+   - [LinkedIn](https://www.linkedin.com/in/bryan-ho-5ba522256/)
 
 ---
 

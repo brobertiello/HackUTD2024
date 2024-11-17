@@ -67,7 +67,7 @@ const HomePage = () => {
                     {/* Footer Links */}
                     <div className="footer">
                         <a href="#" target="_blank">About</a>
-                        <a href="#" target="_blank">Devpost</a>
+                        <a href="https://devpost.com/software/toyota-car-analytics-app" target="_blank">Devpost</a>
                     </div>
                 </div>
             )}

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import ChartSlider from '../components/CarComparison/ChartSlider.jsx';
 import CarCards from '../components/CarComparison/CarCards.jsx';

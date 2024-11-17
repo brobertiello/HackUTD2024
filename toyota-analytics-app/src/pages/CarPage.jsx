@@ -1,6 +1,7 @@
 // src/pages/CarPage.jsx
 import React, { useEffect, useState } from 'react';
 import './CarPage.css';
+import getCarImage from '../hooks/getCarImage';
 
 const CarPage = () => {
     const [manufacturers, setManufacturers] = useState([]);
@@ -11,6 +12,7 @@ const CarPage = () => {
     const [selectedYear, setSelectedYear] = useState('');
     const [carDetails, setCarDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [imagePath, setImagePath] = useState('');
 
     useEffect(() => {
         const loadManufacturers = async () => {
@@ -30,6 +32,20 @@ const CarPage = () => {
 
         loadManufacturers();
     }, []);
+
+    useEffect(() => {
+        if (selectedManufacturer && selectedModel) {
+            try {
+                const path = getCarImage(selectedManufacturer, selectedModel);
+                setImagePath(path);
+            } catch (error) {
+                console.error("Error getting car image:", error);
+                setImagePath('');
+            }
+        } else {
+            setImagePath('');
+        }
+    }, [selectedManufacturer, selectedModel]);
 
     const handleManufacturerChange = (event) => {
         const manufacturer = event.target.value;
@@ -103,13 +119,25 @@ const CarPage = () => {
             const response = await fetch(`/data/manufacturers/${manufacturer}/${model}/${year}.txt`);
             if (!response.ok) throw new Error(`Failed to load details for ${model} (${year}).`);
             const yearText = await response.text();
-            const [city, highway, combination] = yearText.split(',');
+            const lines = yearText.split('\n').filter(Boolean);
+            const [mpgLine, co2Line] = lines;
+            const [city, highway, combination] = mpgLine.split(',');
+            let co2Data = {};
+            if (co2Line) {
+                const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
+                co2Data = {
+                    cityCo2: cityCo2.trim(),
+                    highwayCo2: highwayCo2.trim(),
+                    combinationCo2: combinationCo2.trim(),
+                };
+            }
 
             setCarDetails({
                 year,
                 city: city.trim(),
                 highway: highway.trim(),
                 combination: combination.trim(),
+                ...co2Data,
             });
         } catch (error) {
             console.error("Error loading car details:", error);
@@ -120,7 +148,7 @@ const CarPage = () => {
 
     return (
         <div className="car-page">
-            <div className="main-content">
+            <div className="selection-card">
                 <h1>Car Details Lookup</h1>
                 <div className="selectors">
                     <div className="selector">
@@ -173,12 +201,32 @@ const CarPage = () => {
                         </select>
                     </div>
                 </div>
+            </div>
 
+            <div className="results-card">
                 {isLoading && <div className="loading">Loading...</div>}
-
                 {carDetails ? (
                     <div className="car-details">
-                        <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
+                        <div className="card-header">
+                            <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
+                            <div className="redirect-arrow">
+                                {/* Placeholder for redirect arrow */}
+                                <span>&#8594;</span>
+                            </div>
+                        </div>
+
+                        {imagePath && (
+                            <img
+                                src={imagePath}
+                                alt={`${selectedManufacturer} ${selectedModel}`}
+                                className="car-image"
+                                onError={(e) => {
+                                    e.target.onerror = null; // Prevents infinite loop
+                                    e.target.src = '/data/carImages/default.png'; // Fallback image
+                                }}
+                            />
+                        )}
+
                         <table className="car-table">
                             <thead>
                                 <tr>
@@ -195,9 +243,33 @@ const CarPage = () => {
                                 </tr>
                             </tbody>
                         </table>
+                        {carDetails.cityCo2 && (
+                            <>
+                                <table className="car-table">
+                                    <thead>
+                                        <tr>
+                                            <th>City CO2</th>
+                                            <th>Highway CO2</th>
+                                            <th>Combination CO2</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{carDetails.cityCo2}</td>
+                                            <td>{carDetails.highwayCo2}</td>
+                                            <td>{carDetails.combinationCo2}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </>
+                        )}
                     </div>
                 ) : (
-                    !isLoading && <p className="instruction">Select a manufacturer, model, and year to view details.</p>
+                    !isLoading && (
+                        <p className="instruction">
+                            Select a manufacturer, model, and year to view details.
+                        </p>
+                    )
                 )}
             </div>
         </div>

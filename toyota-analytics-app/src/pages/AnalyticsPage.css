@@ -8,16 +8,23 @@
 }
 
 .main-content {
-    margin: 20px auto;
+    margin: 10px auto;
     max-width: 1200px;
     padding: 20px;
     position: relative; /* Ensures child elements are positioned relative to this container */
     z-index: 1;
+    width: 30%;
+}
+
+.charts {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
 }
 
 .chart-container {
     opacity: 0;
-    width: 50%;
+    width: 95%;
     transform: translateY(50px); /* Start 50px lower */
     z-index: 0; /* Place it behind the first container initially */
     animation: slideOut 1.5s ease-out forwards;

@@ -11,8 +11,6 @@ function getCarImage(make, model) {
     // Construct the file path
     const imagePath = `/data/carImages/${formattedMake}${formattedModel}.png`;
 
-    console.log(imagePath);
-
     return imagePath;
 }
 

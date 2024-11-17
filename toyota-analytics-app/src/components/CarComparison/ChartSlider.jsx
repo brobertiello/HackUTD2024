@@ -1,5 +1,5 @@
-import MPGLineChart from "../chart/MPGLineChart";
-import CO2LineChart from "../chart/CO2LineChart";
+import MPGLineChart from "../Chart/MPGLineChart";
+import CO2LineChart from "../Chart/CO2LineChart";
 import React, { useState } from 'react';
 import {
   Chart as ChartJS,

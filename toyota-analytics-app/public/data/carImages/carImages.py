@@ -4,7 +4,7 @@ import os
 # Path to the input file
 input_file = "uniquecars.txt"
 # Your CarsXE API key
-api_key = "09nftuhkq_qa1dx6n5x_e8ddx6tpv"
+api_key = "" # Your API Key
 
 # Ensure output directory exists
 output_dir = os.path.abspath("..")  # Current Folder

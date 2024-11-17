@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import ChartSlider from '../components/CarComparison/ChartSlider.jsx';
 import CarCards from '../components/CarComparison/CarCards.jsx';
+import { useLocation } from 'react-router-dom';
 import styles from './AnalyticsPage.css';
 
 const AnalyticsPage = () => {
@@ -12,6 +13,14 @@ const AnalyticsPage = () => {
     const [additionalCars, setAdditionalCars] = useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
+    const location = useLocation();
+    const carList = location.state?.carList || [];
+
+    useEffect(() => {
+        if (carList.length > 0) {
+            handleAddCarsToChart(carList);
+        }
+    }, [carList]);
 
     useEffect(() => {
         const loadManufacturers = async () => {

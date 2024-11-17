@@ -1,5 +1,5 @@
-// src/pages/CarPage.jsx
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CarPage.css';
 import getCarImage from '../hooks/getCarImage';
 
@@ -13,6 +13,7 @@ const CarPage = () => {
     const [carDetails, setCarDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [imagePath, setImagePath] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadManufacturers = async () => {
@@ -146,6 +147,10 @@ const CarPage = () => {
         }
     };
 
+    const redirectToAnalytics = (carList) => {
+        navigate('/analytics', { state: { carList } });
+    };
+
     return (
         <div className="car-page">
             <div className="selection-card">
@@ -209,10 +214,14 @@ const CarPage = () => {
                     <div className="car-details">
                         <div className="card-header">
                             <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
-                            <div className="redirect-arrow">
-                                {/* Placeholder for redirect arrow */}
+                            <div
+                                className="redirect-arrow"
+                                onClick={() => redirectToAnalytics([[selectedManufacturer, selectedModel]])}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <span>&#8594;</span>
                             </div>
+
                         </div>
 
                         {imagePath && (
@@ -244,24 +253,22 @@ const CarPage = () => {
                             </tbody>
                         </table>
                         {carDetails.cityCo2 && (
-                            <>
-                                <table className="car-table">
-                                    <thead>
-                                        <tr>
-                                            <th>City CO2</th>
-                                            <th>Highway CO2</th>
-                                            <th>Combination CO2</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{carDetails.cityCo2}</td>
-                                            <td>{carDetails.highwayCo2}</td>
-                                            <td>{carDetails.combinationCo2}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </>
+                            <table className="car-table">
+                                <thead>
+                                    <tr>
+                                        <th>City CO2</th>
+                                        <th>Highway CO2</th>
+                                        <th>Combination CO2</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{carDetails.cityCo2}</td>
+                                        <td>{carDetails.highwayCo2}</td>
+                                        <td>{carDetails.combinationCo2}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         )}
                     </div>
                 ) : (

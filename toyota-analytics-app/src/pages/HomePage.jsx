@@ -61,7 +61,7 @@ const HomePage = () => {
                     {/* Buttons Row */}
                     <div className="row">
                         <button className="launch-button" onClick={() => window.location.href = '/cars'}>View Cars</button>
-                        <button className="launch-button" onClick={() => window.location.href = '/analytics'}>View Analytics</button>
+                        <button className="launch-button" onClick={() => window.location.href = '/analysis'}>View Analysis</button>
                     </div>
 
                     {/* Footer Links */}

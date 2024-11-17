@@ -33,6 +33,7 @@ const HomePage = () => {
 
     return (
         <>
+
             {!loadingComplete && (
                 <div className="loading">
                     <p class="loadingText">Loading {loadingPercent}%</p>
@@ -47,11 +48,13 @@ const HomePage = () => {
                 <div className="container">
                     {/* Logo and Title Centered */}
                     <div className="logo-container">
-                        <img 
-                            src={require('../assets/ToyotaLogo.png')} 
-                            alt="Toyota Logo"
-                            className="logo"
-                        />
+                        <a href="https://www.toyota.com" target="_blank" rel="noopener noreferrer">
+                            <img 
+                                src={require('../assets/ToyotaLogo.png')} 
+                                alt="Toyota Logo"
+                                className="logo"
+                            />
+                        </a>
                         <h2>Car Analytics App for Engineers</h2>
                     </div>
 
@@ -68,6 +71,7 @@ const HomePage = () => {
                     </div>
                 </div>
             )}
+
         </>
     );
 };

@@ -1,185 +1,147 @@
-# **Toyota Vehicle Analytics App**
+# ToyoTrends
 
-## **Project Overview**
-
-The Toyota Vehicle Analytics App is a React-based web application designed for Toyota engineers to analyze and compare vehicle fuel economy data for the years 2021-2025. This application leverages the Pinata API for storing and retrieving vehicle datasets securely. Engineers can view detailed analytics for Toyota's cars, compare them to other vehicles, and gain actionable insights through interactive visualizations and filtering options. The app is intended to run locally for the time being.
+ToyoTrends is a powerful web application designed for Toyota engineers to visualize and interpret fuel efficiency and carbon emissions data for both Toyota vehicles and competitor vehicles. This tool provides actionable insights, helping engineers gain a competitive edge in the automotive industry.
 
 ---
 
-## **File Structure Breakdown**
+## Key Features
 
-### **Root Directory**
-
-```
-root/
-├── public/
-├── src/
-├── .env
-├── package.json
-├── README.md
-```
-
-### **Public Folder**
-
-- **`index.html`**: Main HTML file for rendering the React application.
-- **`favicon.ico`**: Toyota-branded favicon.
+- **Immersive Intro Animation**: Engages users with a visually appealing introduction.
+- **Reactive Web Components**: Ensures a dynamic and responsive user experience.
+- **Data Analysis on Large Datasets**: Processes vast amounts of data efficiently for actionable insights.
+- **Comparison Tools**: Enables side-by-side analysis of multiple vehicles.
+- **Future Predictive Algorithms**: Offers forecasts based on historical data trends.
+- **AI Navigation and Information Assistance**: Utilizes SambaNova's AI chatbot to streamline user interactions.
 
 ---
 
-### **`src/` Folder**
+## Libraries and Technologies
 
-Contains all source files for the React application.
-
-#### **1. `components/`**
-
-Reusable UI components for the application.
-
-```
-components/
-├── Dashboard/
-│   ├── Dashboard.jsx      # Main dashboard layout and metrics display
-│   ├── Dashboard.css      # Styles for the dashboard
-├── CarList/
-│   ├── CarList.jsx        # Displays a list of Toyota cars
-│   ├── CarCard.jsx        # Renders individual car details
-│   ├── CarList.css        # Styles for the car list and cards
-├── CarComparison/
-│   ├── CarComparison.jsx  # Car comparison tool
-│   ├── CarComparison.css  # Styles for the comparison feature
-├── Chart/
-│   ├── LineChart.jsx      # Line chart component for trends
-│   ├── BarChart.jsx       # Bar chart component for comparisons
-│   ├── PieChart.jsx       # Pie chart component for comparisons
-│   ├── LineChart.css      # Styles for line charts
-│   ├── BarChart.css       # Styles for bar charts
-│   ├── PieChart.css       # Styles for pie charts
-├── Table/
-│   ├── DataTable.jsx      # Data table to display raw or processed data
-│   ├── DataTable.css      # Styles for data tables
-```
+- **React.js**: Framework for building the user interface.
+- **Chart.js**: For advanced data visualization.
+- **queryString**: Simplifies data processing and URL parameter manipulation.
+- **CarsXE**: Generates accurate and high-quality vehicle images.
+- **SambaNova AI**: Provides AI-driven chatbot assistance for seamless navigation.
 
 ---
 
-#### **2. `features/`**
+## Examples of Data Processing
 
-Encapsulates core logic and utility functions for the app.
-
-```
-features/
-├── dataProcessing/
-│   ├── processData.js     # Processes raw vehicle data for visualizations
-│   ├── filterData.js      # Implements filtering logic for datasets
-├── carComparison/
-│   ├── compareCars.js     # Logic for comparing Toyota cars to others
-├── pinata/
-│   ├── uploadFile.js      # Handles file uploads to Pinata
-│   ├── retrieveFiles.js   # Retrieves files and metadata from Pinata
-```
+- **Large Dataset Management**: Organizes extensive datasets to enable quick access and computation.
+- **String Manipulation**: Processes and formats vehicle data to gather and present images effectively.
 
 ---
 
-#### **3. `pages/`**
+## Code Structure
 
-Holds top-level pages of the app, corresponding to different routes.
+The project is organized as follows:
 
 ```
-pages/
-├── HomePage.jsx           # Landing page of the app
-├── HomePage.css           # Styles for the home page
-├── CarPage.jsx            # Page for viewing Toyota cars and comparisons
-├── CarPage.css            # Styles for the car page
-├── AnalyticsPage.jsx      # Analytics dashboard for fuel economy data
-├── AnalyticsPage.css      # Styles for the analytics page
-├── UploadPage.jsx         # File upload page for car data
-├── UploadPage.css         # Styles for the upload page
+toyota-analytics-app
+|-- public
+|   |-- data
+|       |-- carImages
+|       |   |-- Toyota_CAMRY.png
+|       |   |-- Toyota_COROLLA.png
+|       |-- manufacturers
+|       |   |-- Toyota
+|       |       |-- CAMRY
+|       |       |-- COROLLA
+|       |-- filter.py
+|       |-- uniqueCars.py
+|-- src
+|   |-- assets
+|   |-- components
+|   |   |-- charts
+|   |   |-- tables
+|   |-- features
+|   |   |-- services
+|   |   |-- carComparison
+|   |   |-- dataProcessing
+|   |-- hooks
+|   |-- pages
+|   |-- utils
+|   |-- App.js
+|   |-- App.css
+|   |-- index.js
+|   |-- index.css
+|-- .env
+|-- .gitignore
+|-- README.md
 ```
+
+### Key Files and Directories
+
+- **public/data**: Stores vehicle images and manufacturer-specific data.
+  - `filter.py`: Script to filter dataset information.
+  - `uniqueCars.py`: Script to identify unique vehicle entries.
+- **src/assets**: Contains static assets.
+- **src/components**: Includes reusable UI components like charts and tables.
+- **src/features**: Houses core application features like car comparison and data processing.
+- **src/hooks**: Custom React hooks for managing app state.
+- **src/utils**: Utility functions for common operations.
 
 ---
 
-#### **4. `hooks/`**
+## Development Timeline
 
-Custom React hooks for encapsulating reusable logic.
+The entire project was completed in under 24 hours as part of [HackUTD XI](https://ripple.hackutd.co/).
 
-```
-hooks/
-├── useFetch.js            # Fetch data from APIs or local files
-├── usePinataAPI.js        # Handles Pinata API integration
-```
+### Contributors
 
----
-
-#### **5. `services/`**
-
-Handles API communication and backend integration.
-
-```
-services/
-├── pinataService.js       # Manages interactions with Pinata (e.g., pinFileToIPFS)
-├── carService.js          # Fetches and compares car data
-```
+- **Brandon Robertiello**
+   - br@ou.edu
+   - [LinkedIn](https://www.linkedin.com/in/brandon-robertiello/)
+- **Melissa Ng**
+   - melissa.j.ng-1@ou.edu
+   - [LinkedIn](https://www.linkedin.com/in/melissa-ng1/)
+- **Lucas Ho**
+   - lucas.ho-1@ou.edu
+   - [LinkedIn](https://www.linkedin.com/in/lucas-t-ho/)
+- **Bryan Ho**
 
 ---
 
-#### **6. `utils/`**
+## Installation and Setup
 
-Utility functions and constants used across the app.
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-repo/toyota-analytics-app.git
+   cd toyota-analytics-app
+   ```
 
-```
-utils/
-├── constants.js           # Constants for endpoints, chart colors, etc.
-├── helpers.js             # Helper functions for formatting and calculations
-```
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
----
+3. **Environment Variables**:
+   Create a `.env` file in the root directory and populate it with necessary API keys and configurations (e.g., CarsXE and SambaNova).
 
-#### **Other Files**
+4. **Run the Application**:
+   ```bash
+   npm start
+   ```
 
-- **`App.js`**: Root React component managing routing and global state.
-- **`index.js`**: Application entry point rendering the React app.
-- **`App.css`**: Global CSS styles for the application.
-- **`config.js`**: Configuration for environment variables and API endpoints.
-- **`.env`**: Stores sensitive keys like the Pinata API key and secret.
-
----
-
-## **Proposed Features**
-
-1. **Dashboard**:
-
-   - Display vehicle fuel economy trends with line and bar charts.
-   - Highlight key insights and top-performing models.
-
-2. **Toyota Car List**:
-
-   - View all Toyota cars from 2021-2025.
-   - Filter by year, model type, or specific metrics.
-
-3. **Car Comparison**:
-
-   - Compare Toyota cars to other vehicles side-by-side.
-   - Use metrics like MPG, emissions, and engine type.
-
-4. **File Uploads**:
-
-   - Upload new datasets dynamically using the Pinata API.
-   - Store metadata for each file (e.g., year, description).
-
-5. **Data Visualizations**:
-   - Interactive charts to explore trends and make comparisons.
+5. Access the app at `http://localhost:3000`.
 
 ---
 
-## **Next Steps**
+## Future Improvements
 
-1. **Set Up Initial Components**:
-   - Build `CarList` and `Dashboard` with mock data.
-2. **Integrate Pinata API**:
-   - Implement upload and retrieval functionality.
-3. **Develop Analytics Tools**:
-   - Create visualizations for trends and comparisons.
-4. **Test and Refine**:
-   - Ensure seamless user interaction and clean design.
+- Enhanced predictive analytics for carbon emissions trends.
+- Integration with more AI tools for advanced insights.
+- Expansion to include more competitor data.
 
 ---
 
-This structure ensures scalability, maintainability, and a clear separation of concerns while focusing on delivering a high-quality experience for Toyota engineers.
+## License
+
+This project is open-source and available under the MIT License. Feel free to fork and contribute!
+
+---
+
+## Contact
+
+For more information, reach out to any of the contributors or submit an issue on the GitHub repository.
+

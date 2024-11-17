@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import MPGLineChart from '../components/chart/MPGLineChart.jsx';
-import CO2LineChart from '../components/chart/CO2LineChart.jsx';
+import React, { useEffect, useState, useMemo } from 'react';
+import ChartSlider from '../components/CarComparison/ChartSlider.jsx';
+import CarCards from '../components/CarComparison/CarCards.jsx';
 import styles from './AnalyticsPage.css';
 
 const AnalyticsPage = () => {
-    const [toyotaModels, setToyotaModels] = useState([]);
-    const [selectedToyotaModel, setSelectedToyotaModel] = useState('');
-    const [toyotaCarDetails, setToyotaCarDetails] = useState(null);
-
     const [manufacturers, setManufacturers] = useState([]);
     const [models, setModels] = useState([]);
     const [selectedManufacturer, setSelectedManufacturer] = useState('');
     const [selectedModel, setSelectedModel] = useState('');
-    const [carDetails, setCarDetails] = useState(null);
+    const [additionalCars, setAdditionalCars] = useState([]);
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -32,54 +28,8 @@ const AnalyticsPage = () => {
             }
         };
 
-        const loadToyotaModels = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch('/data/manufacturers/Toyota/directory.txt');
-                if (!response.ok) throw new Error('Failed to load Toyota models.');
-                const text = await response.text();
-                const models = text.split('\n').filter(Boolean);
-                setToyotaModels(models);
-            } catch (error) {
-                console.error("Error loading Toyota models:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         loadManufacturers();
-        loadToyotaModels();
     }, []);
-
-    const handleToyotaModelChange = (event) => {
-        const model = event.target.value;
-        setSelectedToyotaModel(model);
-        setToyotaCarDetails(null);
-        if (model) {
-            loadCarDetails('Toyota', model, setToyotaCarDetails);
-        }
-    };
-
-    const handleManufacturerChange = (event) => {
-        const manufacturer = event.target.value;
-        setSelectedManufacturer(manufacturer);
-        setSelectedModel('');
-        setCarDetails(null);
-        if (manufacturer) {
-            loadModels(manufacturer);
-        } else {
-            setModels([]);
-        }
-    };
-
-    const handleModelChange = (event) => {
-        const model = event.target.value;
-        setSelectedModel(model);
-        setCarDetails(null);
-        if (model) {
-            loadCarDetails(selectedManufacturer, model, setCarDetails);
-        }
-    };
 
     const loadModels = async (manufacturer) => {
         try {
@@ -96,193 +46,140 @@ const AnalyticsPage = () => {
         }
     };
 
-    const loadCarDetails = async (manufacturer, model, setCarDetails) => {
+    const handleAddToChart = async () => {
+        if (!selectedManufacturer || !selectedModel) return;
+    
+        const newCarLabel = `${selectedManufacturer} ${selectedModel}`;
+    
+        // Check for duplicates
+        if (additionalCars.some((car) => car.label === newCarLabel)) {
+            alert("This car has already been added."); // Notify the user
+            return;
+        }
+    
         try {
             setIsLoading(true);
-            console.log(`Fetching years for ${manufacturer} ${model}...`);
-    
-            const response = await fetch(`/data/manufacturers/${manufacturer}/${model}/directory.txt`);
-            if (!response.ok) throw new Error(`Failed to load years for ${model}.`);
-    
+            const response = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/directory.txt`);
+            if (!response.ok) throw new Error(`Failed to load years for ${selectedModel}.`);
             const yearText = await response.text();
             const years = yearText.split('\n').filter(Boolean);
-            console.log(`Years found: ${years}`);
     
             const carDetailsArray = [];
-    
-            for (let i = 0; i < years.length; i++) {
-                console.log(`Fetching details for year ${years[i]}...`);
-                const detailsResponse = await fetch(`/data/manufacturers/${manufacturer}/${model}/${years[i]}.txt`);
-                if (!detailsResponse.ok) {
-                    console.error(`Failed to load details for ${model} (${years[i]}).`);
-                    continue;
-                }
-    
+            for (let year of years) {
+                const detailsResponse = await fetch(`/data/manufacturers/${selectedManufacturer}/${selectedModel}/${year}.txt`);
+                if (!detailsResponse.ok) continue;
                 const detailsText = await detailsResponse.text();
-                console.log(`Raw details for year ${years[i]}:`, detailsText);
-    
-                const [
-                    cityMPG,
-                    hwyMPG,
-                    combinedMPG,
-                    cityCO2,
-                    hwyCO2,
-                    combinedCO2,
-                ] = detailsText.split(',');
-    
-                console.log(`Parsed details for year ${years[i]}:`, {
-                    cityMPG,
-                    hwyMPG,
-                    combinedMPG,
-                    cityCO2,
-                    hwyCO2,
-                    combinedCO2,
-                });
+                const [cityMPG, hwyMPG, combinedMPG, cityCO2, hwyCO2, combinedCO2] = detailsText.split(',').map((val) => val.trim());
     
                 carDetailsArray.push({
-                    year: years[i].trim(),
-                    city: cityMPG ? cityMPG.trim() : null,
-                    highway: hwyMPG ? hwyMPG.trim() : null,
-                    combination: combinedMPG ? combinedMPG.trim() : null,
-                    cityCO2: cityCO2 ? cityCO2.trim() : null,
-                    highwayCO2: hwyCO2 ? hwyCO2.trim() : null,
-                    combinationCO2: combinedCO2 ? combinedCO2.trim() : null,
+                    year: parseInt(year, 10),
+                    city: parseInt(cityMPG, 10),
+                    highway: parseInt(hwyMPG, 10),
+                    combination: parseInt(combinedMPG, 10),
+                    cityCO2: parseInt(cityCO2, 10),
+                    highwayCO2: parseInt(hwyCO2, 10),
+                    combinationCO2: parseInt(combinedCO2, 10),
                 });
             }
     
-            console.log(`Final car details for ${manufacturer} ${model}:`, carDetailsArray);
-            setCarDetails(carDetailsArray);
+            setAdditionalCars((prev) => [
+                ...prev,
+                {
+                    label: newCarLabel,
+                    xvalues: carDetailsArray.map((detail) => detail.year),
+                    ycity: carDetailsArray.map((detail) => detail.city),
+                    yhighway: carDetailsArray.map((detail) => detail.highway),
+                    ycombined: carDetailsArray.map((detail) => detail.combination),
+                    ycityCO2: carDetailsArray.map((detail) => detail.cityCO2),
+                    yhighwayCO2: carDetailsArray.map((detail) => detail.highwayCO2),
+                    ycombinedCO2: carDetailsArray.map((detail) => detail.combinationCO2),
+                },
+            ]);
         } catch (error) {
-            console.error("Error loading car details:", error);
+            console.error("Error adding car to chart:", error);
         } finally {
             setIsLoading(false);
         }
     };
     
-    
 
-    
-
-    console.log('Toyota Car Details:', toyotaCarDetails);
-    console.log('Other Manufacturer Car Details:', carDetails);
-
-    
+    const memoizedCars = useMemo(() => additionalCars, [additionalCars]);
 
     return (
         <div className="car-page">
             <div className="main-content">
                 <h1>Car Details Lookup</h1>
-                <div className="columns">
-                    {/* Toyota Column */}
-                    <div className="column">
-                        <h2>Toyota</h2>
-                        <div className="selectors">
-                            <div className="selector">
-                                <label htmlFor="toyota-model-select">Model:</label>
-                                <select
-                                    id="toyota-model-select"
-                                    value={selectedToyotaModel}
-                                    onChange={handleToyotaModelChange}
-                                >
-                                    <option value="">--Select Toyota Model--</option>
-                                    {toyotaModels.map((model, index) => (
-                                        <option key={index} value={model}>
-                                            {model}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+                <div className="selectors">
+                    <div className="selector">
+                        <label htmlFor="manufacturer-select">Manufacturer:</label>
+                        <select
+                            id="manufacturer-select"
+                            value={selectedManufacturer}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value !== selectedManufacturer) {
+                                    setSelectedManufacturer(value);
+                                    setSelectedModel('');
+                                    setModels([]);
+                                    if (value) loadModels(value);
+                                }
+                            }}
+                        >
+                            <option value="">--Select Manufacturer--</option>
+                            {manufacturers.map((manufacturer, index) => (
+                                <option key={index} value={manufacturer}>
+                                    {manufacturer}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <div>
-                        {/* Other Manufacturer Column */}
-                        <div className="column">
-                            <h2>Compare with Other Manufacturer</h2>
-                            <div className="selectors">
-                                <div className="selector">
-                                    <label htmlFor="manufacturer-select">Manufacturer:</label>
-                                    <select
-                                        id="manufacturer-select"
-                                        value={selectedManufacturer}
-                                        onChange={handleManufacturerChange}
-                                    >
-                                        <option value="">--Select Manufacturer--</option>
-                                        {manufacturers.map((manufacturer, index) => (
-                                            <option key={index} value={manufacturer}>
-                                                {manufacturer}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
 
-                                <div className="selector">
-                                    <label htmlFor="model-select">Model:</label>
-                                    <select
-                                        id="model-select"
-                                        value={selectedModel}
-                                        onChange={handleModelChange}
-                                        disabled={!selectedManufacturer || models.length === 0}
-                                    >
-                                        <option value="">--Select Model--</option>
-                                        {models.map((model, index) => (
-                                            <option key={index} value={model}>
-                                                {model}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="selector">
+                        <label htmlFor="model-select">Model:</label>
+                        <select
+                            id="model-select"
+                            value={selectedModel}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value !== selectedModel) {
+                                    setSelectedModel(value);
+                                }
+                            }}
+                            disabled={!selectedManufacturer}
+                        >
+                            <option value="">--Select Model--</option>
+                            {models.map((model, index) => (
+                                <option key={index} value={model}>
+                                    {model}
+                                </option>
+                            ))}
+                        </select>
                     </div>
+
+                    <button onClick={handleAddToChart} disabled={!selectedManufacturer || !selectedModel}>
+                        Add to Chart
+                    </button>
                 </div>
             </div>
-            {carDetails && toyotaCarDetails && (
-            <div className="main-content chart-container">
-                <MPGLineChart
-                    cars={[
-                        {
-                            label: `Toyota ${selectedToyotaModel}`,
-                            xvalues: toyotaCarDetails.map((detail) => parseInt(detail.year, 10)), // Years as x-axis values
-                            ycity: toyotaCarDetails.map((detail) => parseInt(detail.city, 10)), // City MPG for all years
-                            yhighway: toyotaCarDetails.map((detail) => parseInt(detail.highway, 10)), // Highway MPG for all years
-                            ycombined: toyotaCarDetails.map((detail) => parseInt(detail.combination, 10)), // Combined MPG for all years
-                        },
-                        {
-                            label: `${selectedManufacturer} ${selectedModel}`,
-                            xvalues: carDetails.map((detail) => parseInt(detail.year, 10)), // Years as x-axis values
-                            ycity: carDetails.map((detail) => parseInt(detail.city, 10)), // City MPG for all years
-                            yhighway: carDetails.map((detail) => parseInt(detail.highway, 10)), // Highway MPG for all years
-                            ycombined: carDetails.map((detail) => parseInt(detail.combination, 10)), // Combined MPG for all years
-                        },
-                    ]}
-                />
+
+            <div className="charts">
+                {/* Car Cards */}
+                {memoizedCars.length > 0 && ( // Only render CarCards if there are cars
+                <div className="main-content">
+                        <div className="car-cards">
+                            <CarCards cars={memoizedCars} />
+                        </div>
+                </div>
+                )}
+
+
+                {/* Chart Slider */}
+                {memoizedCars.length > 0 && ( // Only render the chart if there are cars
+                    <div className="main-content">
+                        <ChartSlider mpgData={memoizedCars} co2Data={memoizedCars} />
+                    </div>
+                )}
             </div>
-            )}
-            
-            {carDetails && toyotaCarDetails && (
-            <div className="main-content chart-container">
-                <CO2LineChart
-                    cars={[
-                        {
-                            label: `Toyota ${selectedToyotaModel}`,
-                            xvalues: toyotaCarDetails.map((detail) => parseInt(detail.year, 10)), // Years as x-axis values
-                            ycity: toyotaCarDetails.map((detail) => parseInt(detail.cityCO2, 10)), // City CO2 for all years
-                            yhighway: toyotaCarDetails.map((detail) => parseInt(detail.highwayCO2, 10)), // Highway CO2 for all years
-                            ycombined: toyotaCarDetails.map((detail) => parseInt(detail.combinationCO2, 10)), // Combined CO2 for all years
-                        },
-                        {
-                            label: `${selectedManufacturer} ${selectedModel}`,
-                            xvalues: carDetails.map((detail) => parseInt(detail.year, 10)), // Years as x-axis values
-                            ycity: carDetails.map((detail) => parseInt(detail.cityCO2, 10)), // City CO2 for all years
-                            yhighway: carDetails.map((detail) => parseInt(detail.highwayCO2, 10)), // Highway CO2 for all years
-                            ycombined: carDetails.map((detail) => parseInt(detail.combinationCO2, 10)), // Combined CO2 for all years
-                        },
-                    ]}
-                />
-            </div>
-                
-            )}
-            
         </div>
     );
 };

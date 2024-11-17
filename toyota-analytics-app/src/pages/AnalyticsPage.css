@@ -1,0 +1,41 @@
+.car-page {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 20px;
+}
+
+.main-content {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 20px;
+    position: relative; /* Ensures child elements are positioned relative to this container */
+    z-index: 1;
+}
+
+.chart-container {
+    opacity: 0;
+    width: 50%;
+    transform: translateY(50px); /* Start 50px lower */
+    z-index: 0; /* Place it behind the first container initially */
+    animation: slideOut 1.5s ease-out forwards;
+}
+
+@keyframes slideOut {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+        z-index: 0;
+    }
+    50% {
+        opacity: 0.5;
+        z-index: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        z-index: 2; /* Bring it in front */
+    }
+}

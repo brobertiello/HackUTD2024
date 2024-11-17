@@ -70,10 +70,11 @@ const AnalyticsPage = () => {
                 if (!detailsResponse.ok) continue;
                 const detailsText = await detailsResponse.text();
                 const [cityMPG, hwyMPG, combinedMPG, cityCO2, hwyCO2, combinedCO2] = detailsText.split(',').map((val) => val.trim());
+
     
                 carDetailsArray.push({
                     year: parseInt(year, 10),
-                    city: parseInt(cityMPG, 10),
+                    city: parseInt(cityMPG, 10), // Default to 0 if parsing fails
                     highway: parseInt(hwyMPG, 10),
                     combination: parseInt(combinedMPG, 10),
                     cityCO2: parseInt(cityCO2, 10),
@@ -81,18 +82,35 @@ const AnalyticsPage = () => {
                     combinationCO2: parseInt(combinedCO2, 10),
                 });
             }
+
+            console.log(carDetailsArray)
+    
+            // Ensure years are fixed to 2021-2025
+            const fixedYears = [2021, 2022, 2023, 2024, 2025];
+            const alignedData = fixedYears.map((year) => {
+                const details = carDetailsArray.find((detail) => detail.year === year) || {};
+                return {
+                    year,
+                    city: details.city,
+                    highway: details.highway,
+                    combination: details.combination,
+                    cityCO2: details.cityCO2,
+                    highwayCO2: details.highwayCO2,
+                    combinationCO2: details.combinationCO2,
+                };
+            });
     
             setAdditionalCars((prev) => [
                 ...prev,
                 {
                     label: newCarLabel,
-                    xvalues: carDetailsArray.map((detail) => detail.year),
-                    ycity: carDetailsArray.map((detail) => detail.city),
-                    yhighway: carDetailsArray.map((detail) => detail.highway),
-                    ycombined: carDetailsArray.map((detail) => detail.combination),
-                    ycityCO2: carDetailsArray.map((detail) => detail.cityCO2),
-                    yhighwayCO2: carDetailsArray.map((detail) => detail.highwayCO2),
-                    ycombinedCO2: carDetailsArray.map((detail) => detail.combinationCO2),
+                    xvalues: alignedData.map((detail) => detail.year),
+                    ycity: alignedData.map((detail) => detail.city),
+                    yhighway: alignedData.map((detail) => detail.highway),
+                    ycombined: alignedData.map((detail) => detail.combination),
+                    ycityCO2: alignedData.map((detail) => detail.cityCO2),
+                    yhighwayCO2: alignedData.map((detail) => detail.highwayCO2),
+                    ycombinedCO2: alignedData.map((detail) => detail.combinationCO2),
                 },
             ]);
         } catch (error) {
@@ -102,12 +120,13 @@ const AnalyticsPage = () => {
         }
     };
     
+    
 
     const memoizedCars = useMemo(() => additionalCars, [additionalCars]);
 
     return (
         <div className="car-page">
-            <div className="main-content">
+            <div className="main-content right-column">
                 <h1>Car Details Lookup</h1>
                 <div className="selectors">
                     <div className="selector">
@@ -156,7 +175,7 @@ const AnalyticsPage = () => {
                         </select>
                     </div>
 
-                    <button onClick={handleAddToChart} disabled={!selectedManufacturer || !selectedModel}>
+                    <button className='launch-button' onClick={handleAddToChart} disabled={!selectedManufacturer || !selectedModel}>
                         Add to Chart
                     </button>
                 </div>

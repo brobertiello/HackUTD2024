@@ -1,7 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  Chart as ChartJS
-} from 'chart.js';
+import { Chart as ChartJS } from 'chart.js';
 
 const MPGLineChart = ({ cars }) => {
   const chartRef = useRef(null);
@@ -16,21 +14,31 @@ const MPGLineChart = ({ cars }) => {
       chartRef.current.chartInstance.destroy();
     }
 
-    // Prepare datasets and labels
-    const labels = cars[0]?.xvalues || []; // Use the first car's years as labels
-    const datasets = cars.map((car, index) => ({
-      label: car.label,
-      data: car.ycombined,
-      borderColor: `hsl(${index * 60}, 70%, 50%)`,
-      backgroundColor: `hsl(${index * 60}, 70%, 70%)`,
-      fill: false,
-    }));
+    // Fixed x-axis labels
+    const labels = [2021, 2022, 2023, 2024, 2025];
+
+    // Prepare datasets, ensuring alignment with fixed labels
+    const datasets = cars.map((car, index) => {
+      // Map yvalues to fixed labels (assumes cars[0].xvalues aligns with 2021-2025)
+      const data = labels.map((year) => {
+        const yearIndex = car.xvalues?.indexOf(year); // Find index of year in car's data
+        return yearIndex !== -1 ? car.ycombined[yearIndex] : null; // Use null if year not found
+      });
+
+      return {
+        label: car.label,
+        data,
+        borderColor: `hsl(${index * 60}, 70%, 50%)`,
+        backgroundColor: `hsl(${index * 60}, 70%, 70%)`,
+        fill: false,
+      };
+    });
 
     // Create a new Chart.js instance
     chartRef.current.chartInstance = new ChartJS(ctx, {
       type: 'line',
       data: {
-        labels,
+        labels, // Use fixed labels
         datasets,
       },
       options: {

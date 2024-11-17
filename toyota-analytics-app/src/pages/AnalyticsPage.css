@@ -7,24 +7,24 @@
     gap: 20px;
 }
 
+.right-column {
+    width: 100%;
+}
+
 .main-content {
     margin: 10px auto;
-    max-width: 1200px;
     padding: 20px;
     position: relative; /* Ensures child elements are positioned relative to this container */
     z-index: 1;
-    width: 30%;
 }
 
 .charts {
     display: flex;
     flex-direction: column;
-    width: 40%;
 }
 
 .chart-container {
     opacity: 0;
-    width: 95%;
     transform: translateY(50px); /* Start 50px lower */
     z-index: 0; /* Place it behind the first container initially */
     animation: slideOut 1.5s ease-out forwards;
@@ -45,4 +45,22 @@
         transform: translateY(0);
         z-index: 2; /* Bring it in front */
     }
+}
+
+
+.launch-button {
+    padding: 0.9375rem 1.875rem;
+    font-size: 1rem;
+    color: white;
+    background-color: #e31b23;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.launch-button:hover {
+    background-color: #ca1d22;
+    transform: scale(1.1);
 }

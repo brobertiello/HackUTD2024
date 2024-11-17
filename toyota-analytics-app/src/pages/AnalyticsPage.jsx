@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import MPGLineChart from '../components/chart/MPGLineChart.jsx';
-import CO2LineChart from '../components/chart/CO2LineChart.jsx';
+import MPGLineChart from '../components/Chart/MPGLineChart.jsx';
+import CO2LineChart from '../components/Chart/CO2LineChart.jsx';
 import styles from './AnalyticsPage.css';
 
 const AnalyticsPage = () => {

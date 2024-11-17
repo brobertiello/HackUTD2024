@@ -1,0 +1,86 @@
+/* src/pages/CarPage.css */
+
+.car-page {
+    display: flex;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 20%;
+    background-color: #f8f8f8;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    color: #e31b23;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.manufacturer-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.manufacturer-list li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.manufacturer-list li:hover {
+    background-color: #f1f1f1;
+}
+
+.manufacturer-list .selected {
+    background-color: #e31b23;
+    color: white;
+    font-weight: bold;
+}
+
+/* Main content styles */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.car-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.car-table th, .car-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.car-table th {
+    background-color: #e31b23;
+    color: white;
+    text-align: center;
+}
+
+.car-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.car-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}

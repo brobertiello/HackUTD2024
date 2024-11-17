@@ -103,13 +103,25 @@ const CarPage = () => {
             const response = await fetch(`/data/manufacturers/${manufacturer}/${model}/${year}.txt`);
             if (!response.ok) throw new Error(`Failed to load details for ${model} (${year}).`);
             const yearText = await response.text();
-            const [city, highway, combination] = yearText.split(',');
+            const lines = yearText.split('\n').filter(Boolean);
+            const [mpgLine, co2Line] = lines;
+            const [city, highway, combination] = mpgLine.split(',');
+            let co2Data = {};
+            if (co2Line) {
+                const [cityCo2, highwayCo2, combinationCo2] = co2Line.split(',');
+                co2Data = {
+                    cityCo2: cityCo2.trim(),
+                    highwayCo2: highwayCo2.trim(),
+                    combinationCo2: combinationCo2.trim(),
+                };
+            }
 
             setCarDetails({
                 year,
                 city: city.trim(),
                 highway: highway.trim(),
                 combination: combination.trim(),
+                ...co2Data,
             });
         } catch (error) {
             console.error("Error loading car details:", error);
@@ -120,7 +132,7 @@ const CarPage = () => {
 
     return (
         <div className="car-page">
-            <div className="main-content">
+            <div className="selection-card">
                 <h1>Car Details Lookup</h1>
                 <div className="selectors">
                     <div className="selector">
@@ -173,12 +185,19 @@ const CarPage = () => {
                         </select>
                     </div>
                 </div>
+            </div>
 
+            <div className="results-card">
                 {isLoading && <div className="loading">Loading...</div>}
-
                 {carDetails ? (
                     <div className="car-details">
-                        <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
+                        <div className="card-header">
+                            <h2>{`${selectedManufacturer} ${selectedModel} (${carDetails.year})`}</h2>
+                            <div className="redirect-arrow">
+                                {/* Placeholder for redirect arrow */}
+                                <span>&#8594;</span>
+                            </div>
+                        </div>
                         <table className="car-table">
                             <thead>
                                 <tr>
@@ -195,9 +214,34 @@ const CarPage = () => {
                                 </tr>
                             </tbody>
                         </table>
+                        {carDetails.cityCo2 && (
+                            <>
+                                <h3>CO2 Emissions</h3>
+                                <table className="car-table">
+                                    <thead>
+                                        <tr>
+                                            <th>City CO2</th>
+                                            <th>Highway CO2</th>
+                                            <th>Combination CO2</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{carDetails.cityCo2}</td>
+                                            <td>{carDetails.highwayCo2}</td>
+                                            <td>{carDetails.combinationCo2}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </>
+                        )}
                     </div>
                 ) : (
-                    !isLoading && <p className="instruction">Select a manufacturer, model, and year to view details.</p>
+                    !isLoading && (
+                        <p className="instruction">
+                            Select a manufacturer, model, and year to view details.
+                        </p>
+                    )
                 )}
             </div>
         </div>

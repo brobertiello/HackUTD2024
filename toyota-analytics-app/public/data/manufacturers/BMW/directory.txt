@@ -1,0 +1,141 @@
+228i Gran Coupe
+228i xDrive Gran Coupe
+230i Convertible
+230i Coupe
+230i xDrive Convertible
+230i xDrive Coupe
+330i
+330i Sedan
+330i xDrive
+330i xDrive Sedan
+430i Convertible
+430i Coupe
+430i Gran Coupe
+430i xDrive Convertible
+430i xDrive Coupe
+430i xDrive Gran Coupe
+530i
+530i Sedan
+530i xDrive
+530i xDrive Sedan
+540i
+540i Sedan
+540i xDrive
+540i xDrive Sedan
+740i
+740i Sedan
+740i xDrive
+740i xDrive Sedan
+750i xDrive
+750i xDrive Sedan
+760i xDrive Sedan
+840i Convertible
+840i Coupe
+840i Gran Coupe
+840i xDrive Convertible
+840i xDrive Coupe
+840i xDrive Gran Coupe
+Alpina B7
+ALPINA B7 xDrive
+ALPINA B8 Gran Coupe
+ALPINA XB7
+COOPER CONVERTIBLE
+COOPER COUNTRYMAN
+COOPER COUNTRYMAN ALL4
+COOPER HARDTOP 2 DOOR
+COOPER HARDTOP 4 DOOR
+COOPER S CLUBMAN
+COOPER S CLUBMAN ALL4
+COOPER S CONVERTIBLE
+COOPER S COUNTRYMAN
+COOPER S COUNTRYMAN ALL4
+COOPER S HARDTOP 2 DOOR
+COOPER S HARDTOP 4 DOOR
+Countryman S ALL4
+JCW COUNTRYMAN ALL4
+JOHN COOPER WORKS CLUBMAN ALL4
+JOHN COOPER WORKS CONVERTIBLE
+John Cooper Works GP
+JOHN COOPER WORKS HARDTOP
+JOHN COOPER WORKS HARDTOP 2 DOOR
+M2 Competition Coupe
+M2 Coupe
+M235i xDrive Gran Coupe
+M240i Convertible
+M240i Coupe
+M240i xDrive Convertible
+M240i xDrive Coupe
+M3
+M3 Competition
+M3 Competition M xDrive Sedan
+M3 Competition Sedan
+M3 CS Sedan
+M3 Sedan
+M340i
+M340i Sedan
+M340i xDrive
+M340i xDrive Sedan
+M4 Competition Coupe
+M4 Competition M xDrive Coupe
+M4 Coupe
+M4 CS Coupe
+M4 CSL Coupe
+M440i Convertible
+M440i Coupe
+M440i Gran Coupe
+M440i xDrive Convertible
+M440i xDrive Coupe
+M440i xDrive Gran Coupe
+M4CompetitionMxDriveConvertible
+M5
+M5 Competition
+M5 Competition Sedan
+M5 CS Sedan
+M5 Sedan
+M550i xDrive
+M550i xDrive Sedan
+M760i xDrive
+M760i xDrive Sedan
+M8 Competition Convertible
+M8 Competition Coupe
+M8 Competition Gran Coupe
+M8 Convertible
+M8 Gran Coupe
+M850i xDrive Convertible
+M850i xDrive Coupe
+M850i xDrive Gran Coupe
+Supra 2.0
+Supra 3.0
+X1 M35i
+X1 sDrive28i
+X1 xDrive28i
+X2 M35i
+X2 sDrive28i
+X2 xDrive28i
+X3 M
+X3 M Competition
+X3 M40i
+X3 M50i xDrive
+X3 sDrive30i
+X3 xDrive30i
+X4 M
+X4 M Competition
+X4 M40i
+X4 xDrive30i
+X5 M
+X5 M Competition
+X5 M50i
+X5 M60i xDrive
+X5 sDrive40i
+X5 xDrive40i
+X6 M
+X6 M Competition
+X6 M50i
+X6 M60i xDrive
+X6 sDrive40i
+X6 xDrive40i
+X7 M50i
+X7 M60i xDrive
+X7 xDrive40i
+Z4 M40i
+Z4 sDrive30i

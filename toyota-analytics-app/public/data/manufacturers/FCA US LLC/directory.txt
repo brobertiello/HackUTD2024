@@ -1,0 +1,67 @@
+1500 4X2
+1500 4X4
+1500 Classic 4X2
+1500 Classic 4X4
+1500 HFE 4X2
+1500 HO 4x4
+1500 RHO 4x4
+1500 TRX 4x4
+300
+300 AWD
+500X AWD
+Challenger
+Challenger AWD
+Challenger SRT
+Challenger SRT Demon 170
+Challenger SRT Widebody
+Challenger Widebody
+Charger
+Charger AWD
+Charger SRT Widebody
+Charger Widebody
+Cherokee 4X4
+Cherokee 4x4 Active Drive II
+Cherokee FWD
+Cherokee Trailhawk 4X4
+Compass 4X2
+Compass 4X4
+Durango AWD
+Durango RWD
+Durango SRT AWD
+Giulia
+Giulia AWD
+Gladiator 4X4
+Gladiator EcoDiesel 4x4
+Gladiator Rubic EcoDiesel 4x4
+Gladiator Rubicon EcoDiesel 4x4
+Grand Cherokee 4X2
+Grand Cherokee 4X4
+Grand Cherokee L 4X2
+Grand Cherokee L 4X4
+Grand Cherokee SRT 4x4
+Grand Cherokee Trackhawk 4x4
+Grand Cherokee WK 4X2
+Grand Cherokee WK 4X4
+Grand Wagoneer 4x2
+Grand Wagoneer 4x4
+Grand Wagoneer L 4x4
+Hornet AWD
+Pacifica
+Pacifica AWD
+Promaster City
+Renegade 4x2
+Renegade 4x4
+Renegade Trailhawk 4x4
+Stelvio
+Stelvio AWD
+Voyager
+Wagoneer 4x2
+Wagoneer 4x4
+Wagoneer L 4x2
+Wagoneer L 4x4
+Wrangler 2dr 4X4
+Wrangler 4dr 4X4
+Wrangler 4dr EcoDiesel 4x4
+Wrangler Rubic 4dr EcoDiesel 4x4
+Wrangler Rubicon 2dr 4X4
+Wrangler Rubicon 4dr 4X4

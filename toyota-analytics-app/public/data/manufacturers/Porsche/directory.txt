@@ -1,0 +1,69 @@
+718 Boxster
+718 Boxster GTS 4.0
+718 Boxster S
+718 Boxster T
+718 Cayman
+718 Cayman GT4
+718 Cayman GTS 4.0
+718 Cayman S
+718 Cayman T
+718 GT4 RS
+718 Spyder
+718 Spyder RS
+911 Carrera
+911 Carrera 4
+911 Carrera 4 Cabriolet
+911 Carrera 4 GTS
+911 Carrera 4 GTS Cabriolet
+911 Carrera 4S
+911 Carrera 4S Cabriolet
+911 Carrera Cabriolet
+911 Carrera GTS
+911 Carrera GTS Cabriolet
+911 Carrera S
+911 Carrera S Cabriolet
+911 Carrera T
+911 Dakar
+911 GT3
+911 GT3 RS
+911 GT3 Touring
+911 Sport Classic
+911 ST
+911 Targa 4
+911 Targa 4 GTS
+911 Targa 4S
+911 Turbo
+911 Turbo Cabriolet
+911 Turbo S
+911 Turbo S Cabriolet
+Cayenne
+Cayenne  Cayenne Coupé
+Cayenne Coupe
+Cayenne Coupé
+Cayenne GTS
+Cayenne GTS Coupe
+Cayenne S
+Cayenne S Coupe
+Cayenne S Coupé
+Cayenne Turbo
+Cayenne Turbo Coupé
+Cayenne Turbo GT
+Cayenne Turbo GT Coupe
+Macan
+Macan GTS
+Macan S
+Macan T
+Macan Turbo
+Panamera
+Panamera 4
+Panamera 4 Executive
+Panamera 4 ST
+Panamera 4S
+Panamera 4S Executive
+Panamera 4S ST
+Panamera GTS
+Panamera GTS ST
+Panamera Turbo S
+Panamera Turbo S  Exec  ST
+Panamera Turbo S Executive
+Panamera Turbo S ST

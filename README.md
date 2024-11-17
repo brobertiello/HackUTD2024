@@ -134,6 +134,7 @@ The entire project was completed in under 24 hours as part of [HackUTD XI](https
 - Enhanced predictive analytics for carbon emissions trends.
 - Integration with more AI tools for advanced insights.
 - Expansion to include more competitor data.
+- Export tools for enhanced data analysis.
 
 ---
 

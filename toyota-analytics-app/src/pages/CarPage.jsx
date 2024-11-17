@@ -1,6 +1,7 @@
 // src/pages/CarPage.jsx
 import React, { useEffect, useState } from 'react';
 import './CarPage.css';
+import getCarImage from '../hooks/getCarImage';
 
 const CarPage = () => {
     const [manufacturers, setManufacturers] = useState([]);
@@ -11,6 +12,7 @@ const CarPage = () => {
     const [selectedYear, setSelectedYear] = useState('');
     const [carDetails, setCarDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [imagePath, setImagePath] = useState('');
 
     useEffect(() => {
         const loadManufacturers = async () => {
@@ -30,6 +32,20 @@ const CarPage = () => {
 
         loadManufacturers();
     }, []);
+
+    useEffect(() => {
+        if (selectedManufacturer && selectedModel) {
+            try {
+                const path = getCarImage(selectedManufacturer, selectedModel);
+                setImagePath(path);
+            } catch (error) {
+                console.error("Error getting car image:", error);
+                setImagePath('');
+            }
+        } else {
+            setImagePath('');
+        }
+    }, [selectedManufacturer, selectedModel]);
 
     const handleManufacturerChange = (event) => {
         const manufacturer = event.target.value;
@@ -198,6 +214,19 @@ const CarPage = () => {
                                 <span>&#8594;</span>
                             </div>
                         </div>
+
+                        {imagePath && (
+                            <img
+                                src={imagePath}
+                                alt={`${selectedManufacturer} ${selectedModel}`}
+                                className="car-image"
+                                onError={(e) => {
+                                    e.target.onerror = null; // Prevents infinite loop
+                                    e.target.src = '/data/carImages/default.png'; // Fallback image
+                                }}
+                            />
+                        )}
+
                         <table className="car-table">
                             <thead>
                                 <tr>
@@ -216,7 +245,6 @@ const CarPage = () => {
                         </table>
                         {carDetails.cityCo2 && (
                             <>
-                                <h3>CO2 Emissions</h3>
                                 <table className="car-table">
                                     <thead>
                                         <tr>

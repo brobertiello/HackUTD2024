@@ -85,6 +85,13 @@
     color: #e31b23;
 }
 
+.car-image {
+    display: block;
+    max-height: 20vh;
+    width: auto;
+    margin: 20px auto 0px; /* Center the image and add some bottom margin */
+}
+
 .car-table {
     width: 100%;
     border-collapse: collapse;

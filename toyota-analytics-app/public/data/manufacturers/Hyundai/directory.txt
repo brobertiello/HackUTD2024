@@ -1,0 +1,45 @@
+Accent
+Elantra
+Elantra Hybrid
+Elantra Hybrid Blue
+Elantra N
+G70 AWD
+G70 RWD
+G80 AWD
+G80 RWD
+G90 AWD
+G90 MHEV
+G90 RWD
+GV70 AWD
+GV80 AWD
+GV80 MHEV
+GV80 RWD
+Ioniq
+Ioniq Blue
+Kona AWD
+Kona FWD
+Kona N
+Palisade AWD
+Palisade FWD
+Santa Cruz AWD
+Santa Cruz FWD
+Santa Cruz XRT AWD
+Santa Fe AWD
+Santa Fe AWD XRT
+Santa Fe FWD
+Santa Fe Hybrid
+Santa Fe Hybrid AWD
+Santa Fe Hybrid Blue
+Santa Fe Hybrid FWD
+Sonata
+Sonata AWD
+Sonata FWD
+Sonata Hybrid
+Sonata Hybrid Blue
+Tucson AWD
+Tucson FWD
+Tucson Hybrid
+Tucson Hybrid Blue
+Veloster
+Veloster N
+Venue
